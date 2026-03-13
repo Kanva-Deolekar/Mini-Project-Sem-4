@@ -231,7 +231,7 @@
                     </div>
 
                     <div class="card-body p-0 order-history-list">
-                        <ul class="list-group list-group-flush rounded-0">
+                        <ul class="list-group list-group-flush rounded-0" id="student-orders-list">
                             <% orders.forEach(o=> { %>
                                 <li class="list-group-item p-4">
 
@@ -272,5 +272,76 @@
             </div>
         </div>
     </div>
+    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+        preload="auto"></audio>
 
+    <script>
+        let knownStatuses = {}; // Tracks the status of orders to detect changes
+        let isFirstLoad = true;
+
+        // Ask the server for updates every 3 seconds
+        setInterval(fetchStudentOrders, 3000);
+
+        async function fetchStudentOrders() {
+            try {
+                const response = await fetch('/student/api/orders');
+                const orders = await response.json();
+
+                const ul = document.getElementById('student-orders-list');
+                if (!ul) return;
+
+                let html = '';
+                let statusChanged = false;
+
+                orders.forEach(o => {
+                    // --- SOUND LOGIC ---
+                    // If it's not the first load, and the order WAS 'Pending' but is NOW 'Fulfilled'
+                    if (!isFirstLoad && knownStatuses[o._id] === 'Pending' && o.status === 'Fulfilled') {
+                        statusChanged = true;
+                    }
+                    knownStatuses[o._id] = o.status; // Update known status
+
+                    // --- HTML BUILDING LOGIC ---
+                    const badgeClass = o.status === 'Fulfilled' ? 'bg-success text-white' : 'bg-warning text-dark';
+                    const orderDate = new Date(o.orderTime).toLocaleString();
+
+                    let itemsListHtml = '';
+                    o.items.forEach(i => {
+                        itemsListHtml += `
+                            <li class="mb-1">
+                                <span class="fw-bold" style="color: var(--shadow-accent);">${i.quantity}x</span>
+                                <span class="ms-1 history-item-text">${i.itemName}</span>
+                            </li>`;
+                    });
+
+                    html += `
+                    <li class="list-group-item p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge badge-status ${badgeClass} shadow-sm">${o.status}</span>
+                            <strong class="fs-5" style="color: var(--shadow-accent);">₹${o.totalAmount}</strong>
+                        </div>
+                        <small class="text-muted d-block mb-3 fw-medium">
+                            <i class="fa-regular fa-calendar-days me-1"></i> ${orderDate}
+                        </small>
+                        <div class="bg-light-dark rounded-3 p-3 border">
+                            <ul class="mb-0 ps-3 small text-light">
+                                ${itemsListHtml}
+                            </ul>
+                        </div>
+                    </li>`;
+                });
+
+                ul.innerHTML = html;
+                isFirstLoad = false;
+
+                // Play sound if a status turned to Fulfilled
+                if (statusChanged) {
+                    document.getElementById('notificationSound').play().catch(e => console.log("Audio blocked until user clicks somewhere."));
+                }
+
+            } catch (error) {
+                console.error("Error fetching student orders:", error);
+            }
+        }
+    </script>
     <%- include('../layouts/footer') %>F

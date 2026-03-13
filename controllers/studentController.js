@@ -31,3 +31,16 @@ export const placeOrder = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// --- Add this to the bottom of controllers/studentController.js ---
+
+// API Endpoint for Student AJAX Polling
+export const getLiveStudentOrders = async (req, res) => {
+    try {
+        // Fetch only the orders belonging to the logged-in student
+        const orders = await Order.find({ studentId: req.session.user._id }).sort({ orderTime: -1 });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch student orders" });
+    }
+};

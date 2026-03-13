@@ -414,8 +414,13 @@
         </div>
     </div>
 
+    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
     <script>
-        // Ask the server for new orders every 3000 milliseconds (3 seconds)
+        let latestOrderId = null; // Tracks the most recent order
+        let isFirstLoad = true;
+
+        // Ask the server for new orders every 3 seconds
         setInterval(fetchLiveOrders, 3000);
 
         async function fetchLiveOrders() {
@@ -426,24 +431,33 @@
                 const tbody = document.getElementById('live-orders-table');
                 if (!tbody) return;
 
+                // --- SOUND LOGIC ---
+                if (orders.length > 0) {
+                    const currentLatest = orders[0]._id; // The newest order is always at the top
+                    
+                    // If it's not the first load, and the top order ID is different than before, it's a new order!
+                    if (!isFirstLoad && latestOrderId !== currentLatest) {
+                        document.getElementById('notificationSound').play().catch(e => console.log("Audio blocked until interaction."));
+                    }
+                    latestOrderId = currentLatest;
+                }
+                isFirstLoad = false;
+
+                // --- HTML BUILDING LOGIC ---
                 let html = '';
 
-                // Loop through the JSON data and build the HTML rows using the NEW Dark Theme layout
                 orders.forEach(o => {
-
                     // 1. Build the items list HTML
                     let itemsHtml = `
-                <div class="bg-dark bg-opacity-50 p-2 rounded-2 border border-secondary" style="border-color: var(--shadow-border) !important;">
-                    <ul class="mb-0 small ps-3 text-white">`;
-
+                    <div class="bg-dark bg-opacity-50 p-2 rounded-2 border border-secondary" style="border-color: var(--shadow-border) !important;">
+                        <ul class="mb-0 small ps-3 text-white">`;
                     o.items.forEach(i => {
                         itemsHtml += `<li><span class="text-danger fw-bold">${i.quantity}x</span> ${i.itemName}</li>`;
                     });
-
                     itemsHtml += `
-                    </ul>
-                </div>
-                <div class="mt-2 fw-bold text-success-custom fs-5">₹${o.totalAmount}</div>`;
+                        </ul>
+                    </div>
+                    <div class="mt-2 fw-bold text-success-custom fs-5">₹${o.totalAmount}</div>`;
 
                     // 2. Build the status badge HTML
                     const badgeClass = o.status === 'Fulfilled' ? 'bg-success text-white' : 'bg-warning text-dark';
@@ -465,9 +479,9 @@
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </form>
-                </div>`;
+                    </div>`;
 
-                    // 4. Put it all together in a table row
+                    // 4. Put it all together
                     html += `
                     <tr>
                         <td class="ps-4">
@@ -478,11 +492,9 @@
                         <td>${itemsHtml}</td>
                         <td>${statusBadge}</td>
                         <td class="pe-4">${actionButtons}</td>
-                    </tr>
-                `;
+                    </tr>`;
                 });
 
-                // Replace the old table content with the freshly fetched data
                 tbody.innerHTML = html;
 
             } catch (error) {
