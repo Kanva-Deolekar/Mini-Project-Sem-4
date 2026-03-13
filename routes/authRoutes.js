@@ -6,6 +6,7 @@ import {
     studentSignup,
     studentLogin,
     adminLogin,
+    sendOtp,
     logout
 } from '../controllers/authController.js';
 
@@ -38,7 +39,7 @@ router.post('/login/student', studentLogin);
 // Handles the form submission from the admin login page
 router.post('/login/admin', adminLogin);
 
-
+router.post('/send-otp', sendOtp);
 // ==========================================
 // LOGOUT ROUTE
 // ==========================================

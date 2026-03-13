@@ -4,12 +4,9 @@
         /* Using the same dark theme palette from the login page */
         :root {
             --shadow-accent: #7c3aed;
-            /* Electric Purple */
             --shadow-accent-hover: #6d28d9;
             --shadow-bg: #0b0f19;
-            /* Very dark blue/black */
             --shadow-card: #111827;
-            /* Dark gray */
             --shadow-text: #f3f4f6;
             --shadow-muted: #9ca3af;
         }
@@ -24,7 +21,6 @@
             display: flex;
             align-items: center;
             padding: 2rem 0;
-            /* Extra padding for taller form */
         }
 
         .student-card {
@@ -76,7 +72,6 @@
             color: rgba(156, 163, 175, 0.5);
         }
 
-        /* Fix for native select dropdown options in dark mode */
         .form-select option {
             background-color: var(--shadow-card);
             color: var(--shadow-text);
@@ -95,12 +90,10 @@
             color: var(--shadow-muted) !important;
         }
 
-        /* Custom border color for dark mode dividers */
         .custom-divider {
             border-color: rgba(255, 255, 255, 0.1) !important;
         }
 
-        /* Link hover states */
         .hover-accent {
             color: var(--shadow-accent) !important;
             transition: color 0.3s ease;
@@ -134,7 +127,7 @@
                             </div>
                             <% } %>
 
-                                <form action="/auth/signup/student" method="POST">
+                                <form action="/auth/signup/student" method="POST" id="signupForm">
 
                                     <div class="mb-4">
                                         <label class="fw-bold small text-uppercase text-muted mb-2">Full Name</label>
@@ -147,13 +140,28 @@
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="fw-bold small text-uppercase text-muted mb-2">Email
-                                            Address</label>
+                                        <label class="fw-bold small text-uppercase text-muted mb-2">Email Address</label>
                                         <div class="input-group input-group-lg shadow-sm">
                                             <span class="input-group-text border-end-0"><i
                                                     class="fa-solid fa-envelope"></i></span>
-                                            <input type="email" name="email" class="form-control border-start-0 ps-0"
-                                                placeholder="student@mu.ac.in" required>
+                                            <input type="email" name="email" id="emailInput" class="form-control border-start-0 ps-0"
+                                                placeholder="student@famt.ac.in" 
+                                                pattern="^[a-zA-Z0-9._%+-]+@(gmail\.com|famt\.ac\.in)$" 
+                                                title="Must end in @gmail.com or @famt.ac.in" required>
+                                            <button class="btn btn-primary px-3 fw-bold fs-6" type="button" id="otpBtn" onclick="requestOTP()">
+                                                Send OTP
+                                            </button>
+                                        </div>
+                                        <div id="otpFeedback" class="small mt-2 d-none fw-bold"></div>
+                                    </div>
+
+                                    <div class="mb-4 d-none" id="otpSection">
+                                        <label class="fw-bold small text-uppercase text-muted mb-2 text-warning"><i class="fa-solid fa-key me-1"></i> Enter Verification OTP</label>
+                                        <div class="input-group input-group-lg shadow-sm">
+                                            <span class="input-group-text border-end-0"><i
+                                                    class="fa-solid fa-shield-halved"></i></span>
+                                            <input type="text" name="otp" id="otpInput" class="form-control border-start-0 ps-0 text-warning fw-bold"
+                                                placeholder="123456" maxlength="6" style="letter-spacing: 2px;">
                                         </div>
                                     </div>
 
@@ -206,8 +214,8 @@
                                         </div>
                                     </div>
 
-                                    <button type="submit"
-                                        class="btn btn-primary btn-lg rounded-3 w-100 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2">
+                                    <button type="submit" id="submitBtn"
+                                        class="btn btn-primary btn-lg rounded-3 w-100 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2" disabled>
                                         <i class="fa-solid fa-user-check"></i>
                                         <span>REGISTER ACCOUNT</span>
                                     </button>
@@ -224,4 +232,64 @@
         </div>
     </div>
 
-    <%- include('../layouts/footer') %>
+    <script>
+        async function requestOTP() {
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput.value;
+            const otpBtn = document.getElementById('otpBtn');
+            const feedback = document.getElementById('otpFeedback');
+            
+            // 1. Frontend Regex Validation
+            const regex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|famt\.ac\.in)$/;
+            if (!regex.test(email)) {
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Must use @gmail.com or @famt.ac.in';
+                feedback.classList.remove('d-none', 'text-success');
+                feedback.classList.add('text-danger');
+                emailInput.focus();
+                return;
+            }
+
+            // 2. Change button to loading state
+            otpBtn.disabled = true;
+            otpBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+            try {
+                // 3. Make the API Call to your backend
+                const response = await fetch('/auth/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+
+                if (data.success) {
+                    // Success: Show OTP Input & Enable Submit
+                    document.getElementById('otpSection').classList.remove('d-none');
+                    document.getElementById('otpInput').required = true;
+                    document.getElementById('submitBtn').disabled = false;
+                    
+                    feedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + data.message;
+                    feedback.classList.remove('d-none', 'text-danger');
+                    feedback.classList.add('text-success');
+                    
+                    otpBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sent';
+                    emailInput.readOnly = true; // Lock email so they don't change it after OTP is sent
+                } else {
+                    // Failed: Show error
+                    otpBtn.disabled = false;
+                    otpBtn.innerHTML = 'Send OTP';
+                    feedback.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> ' + data.message;
+                    feedback.classList.remove('d-none', 'text-success');
+                    feedback.classList.add('text-danger');
+                }
+            } catch (err) {
+                console.error(err);
+                otpBtn.disabled = false;
+                otpBtn.innerHTML = 'Send OTP';
+                alert('Network error. Failed to send OTP.');
+            }
+        }
+    </script>
+
+<%- include('../layouts/footer') %>
