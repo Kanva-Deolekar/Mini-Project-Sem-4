@@ -10,6 +10,7 @@ import MongoStore from 'connect-mongo';
 import authRoutes from './routes/authRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import { homedir } from 'os';
 
 // Environment variables configuration
 dotenv.config();
