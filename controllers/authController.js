@@ -57,6 +57,8 @@ export const sendOtp = async (req, res) => {
       tls: {
         rejectUnauthorized: false // Bypasses strict cloud certificate checks
       },
+      
+      family: 4
     });
 
     // Check if student already exists
@@ -158,6 +160,8 @@ export const studentSignup = async (req, res) => {
       tls: {
         rejectUnauthorized: false // Bypasses strict cloud certificate checks
       },
+      
+      family: 4
     });
 
       await transporter.sendMail({
@@ -319,6 +323,8 @@ export const sendForgotPasswordOtp = async (req, res) => {
       tls: {
         rejectUnauthorized: false // Bypasses strict cloud certificate checks
       },
+        
+      family: 4
     });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -414,6 +420,8 @@ export const resetPassword = async (req, res) => {
       tls: {
         rejectUnauthorized: false // Bypasses strict cloud certificate checks
       },
+        
+      family: 4
     });
 
       await transporter.sendMail({
