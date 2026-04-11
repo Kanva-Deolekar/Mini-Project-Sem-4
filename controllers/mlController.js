@@ -2,6 +2,7 @@ import { trainFNN } from '../ml/trainModel.js';
 import { predict } from '../ml/predictDemand.js';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
+import Admin from '../models/Admin.js';
 import { activeModel, activeMae } from '../ml/modelStore.js'; // <-- Import the RAM store
 
 const QUEUE_LIMIT = Number(process.env.ORDER_QUEUE_LIMIT || 10);
@@ -27,10 +28,14 @@ const buildAdminViewData = async () => {
         .sort((a, b) => b.quantity - a.quantity)
         .slice(0, 5);
 
+    const adminDoc = await Admin.findOne({});
+    const eventActive = adminDoc ? adminDoc.eventActive : false;
+
     return {
         products,
         orders,
         isModelTrained: activeModel !== null,
+        eventActive,
         activeMae,
         activeQueueCount,
         queueLimit: QUEUE_LIMIT,

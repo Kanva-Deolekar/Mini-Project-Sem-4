@@ -188,6 +188,7 @@ export const downloadTrainingData = async (req, res) => {
             Item: item.itemName,
             Price: item.price,
             Demand: 0,
+            Event: order.event && order.event.toLowerCase() === 'yes' ? 'Yes' : 'No',
           };
         }
         // Add to the total demand for that meal
@@ -201,7 +202,7 @@ export const downloadTrainingData = async (req, res) => {
     // 4. Build the CSV rows from our perfectly grouped map
     Object.values(aggregatedMap).forEach((record) => {
       const avgSales = record.Demand; // Default assumption, Admin can edit
-      const event = "No"; // Default assumption, Admin can edit
+      const event = record.Event; // Fetched from dynamic map
 
       csvContent += `${record.Day},${record.Time},${record.Item},${record.Price},${avgSales},${event},${record.Demand}\n`;
     });
