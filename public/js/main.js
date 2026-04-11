@@ -1,7 +1,13 @@
 // Calculate total dynamically on Student Dashboard
+function getMenuRows() {
+    const cardRows = document.querySelectorAll('#menu-items .menu-row');
+    if (cardRows.length > 0) return cardRows;
+    return document.querySelectorAll('#menu-items tr');
+}
+
 function calcTotal() {
     let total = 0;
-    const rows = document.querySelectorAll('#menu-items tr');
+    const rows = getMenuRows();
     rows.forEach(row => {
         const price = parseFloat(row.querySelector('.item-price').innerText);
         const qty = parseInt(row.querySelector('.item-qty').value) || 0;
@@ -13,7 +19,7 @@ function calcTotal() {
 // AJAX Order Submission
 async function submitOrder() {
     const cartItems = [];
-    const rows = document.querySelectorAll('#menu-items tr');
+    const rows = getMenuRows();
 
     rows.forEach(row => {
         const qty = parseInt(row.querySelector('.item-qty').value) || 0;
@@ -41,7 +47,20 @@ async function submitOrder() {
         const msgDiv = document.getElementById('order-msg');
         if (data.success) {
             msgDiv.innerHTML = `<div class="alert alert-success rounded-0 border-dark">${data.message}</div>`;
-            setTimeout(() => location.reload(), 1500); // Reload to show updated history
+            if (typeof window.fetchStudentOrders === 'function') {
+                await window.fetchStudentOrders();
+            }
+            if (typeof window.fetchActiveCoupons === 'function') {
+                await window.fetchActiveCoupons();
+            }
+            if (typeof window.refreshQueueStatus === 'function') {
+                await window.refreshQueueStatus();
+            }
+            rows.forEach(row => {
+                const qtyInput = row.querySelector('.item-qty');
+                if (qtyInput) qtyInput.value = 0;
+            });
+            calcTotal();
         } else {
             msgDiv.innerHTML = `<div class="alert alert-danger rounded-0 border-dark">${data.message}</div>`;
         }

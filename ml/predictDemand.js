@@ -17,5 +17,5 @@ export const predict = async (day, time, itemName, price, event, avgSales) => {
     inputTensor.dispose();
     prediction.dispose();
 
-    return Math.ceil(rawOutput * 1.1);
+    return Math.ceil(rawOutput * 1.05);
 };

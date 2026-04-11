@@ -2,9 +2,38 @@ import Product from "../models/Product.js";
 import Order from "../models/Order.js";
 import { activeModel } from "../ml/modelStore.js"; // <-- Import the RAM store
 
+const ACTIVE_QUEUE_STATUSES = ["Pending"];
+const LIVE_ORDERS_LIMIT = 15;
+const QUEUE_LIMIT = Number(process.env.ORDER_QUEUE_LIMIT || 10);
+
 export const getDashboard = async (req, res) => {
   const products = await Product.find({});
   const orders = await Order.find({}).sort({ orderTime: -1 });
+  const activeQueueCount = await Order.countDocuments({
+    status: { $in: ACTIVE_QUEUE_STATUSES },
+  });
+
+  const totalOrders = orders.length;
+  const fulfilledOrders = orders.filter((order) => order.status === "Fulfilled");
+  const rejectedOrders = orders.filter((order) => order.status === "Rejected");
+  const cancelledOrders = orders.filter((order) => order.status === "Cancelled");
+  const paidOrders = orders.filter((order) => order.paymentStatus === "Paid");
+  const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
+  const itemStats = new Map();
+  orders.forEach((order) => {
+    order.items.forEach((item) => {
+      const current = itemStats.get(item.itemName) || { quantity: 0, orders: 0 };
+      current.quantity += item.quantity || 0;
+      current.orders += 1;
+      itemStats.set(item.itemName, current);
+    });
+  });
+
+  const topItems = Array.from(itemStats.entries())
+    .map(([name, stats]) => ({ name, ...stats }))
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5);
 
   // Check if the model exists in RAM right now
   const isModelTrained = activeModel !== null;
@@ -15,12 +44,40 @@ export const getDashboard = async (req, res) => {
     prediction: null,
     error: null,
     isModelTrained, // <-- Pass it to the EJS file
+    queueLimit: QUEUE_LIMIT,
+    activeQueueCount,
+    analytics: {
+      totalOrders,
+      fulfilledOrders: fulfilledOrders.length,
+      rejectedOrders: rejectedOrders.length,
+      cancelledOrders: cancelledOrders.length,
+      paidOrders: paidOrders.length,
+      totalRevenue,
+      topItems,
+    },
   });
 };
 
 export const addProduct = async (req, res) => {
-  const { name, price, isAvailable } = req.body;
-  await Product.create({ name, price, isAvailable: isAvailable === "true" });
+  const { name, price, imageUrl, isAvailable } = req.body;
+  await Product.create({
+    name,
+    price,
+    imageUrl: imageUrl?.trim() || "",
+    isAvailable: isAvailable === "true",
+  });
+  res.redirect("/admin/dashboard");
+};
+
+export const toggleProductAvailability = async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.redirect("/admin/dashboard?error=Product not found");
+  }
+
+  product.isAvailable = !product.isAvailable;
+  await product.save();
   res.redirect("/admin/dashboard");
 };
 
@@ -30,7 +87,20 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const fulfillOrder = async (req, res) => {
-  await Order.findByIdAndUpdate(req.params.id, { status: "Fulfilled" });
+  await Order.findByIdAndUpdate(req.params.id, {
+    status: "Fulfilled",
+    statusUpdatedAt: new Date(),
+  });
+  res.redirect("/admin/dashboard");
+};
+
+export const rejectOrder = async (req, res) => {
+  await Order.findByIdAndUpdate(req.params.id, {
+    status: "Rejected",
+    paymentStatus: "Unpaid",
+    couponCode: null,
+    statusUpdatedAt: new Date(),
+  });
   res.redirect("/admin/dashboard");
 };
 
@@ -50,8 +120,7 @@ export const clearAllOrders = async (req, res) => {
 // API Endpoint for AJAX Polling
 export const getLiveOrders = async (req, res) => {
   try {
-    // Fetch the 50 most recent orders so the payload stays small and fast
-    const orders = await Order.find({}).sort({ orderTime: -1 }).limit(50);
+    const orders = await Order.find({}).sort({ orderTime: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch live orders" });

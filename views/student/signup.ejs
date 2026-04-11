@@ -127,7 +127,7 @@
                             </div>
                             <% } %>
 
-                                <form action="/auth/signup/student" method="POST" id="signupForm">
+                                <form action="/auth/signup/student" method="POST" id="signupForm" onsubmit="return validatePasswords()">
 
                                     <div class="mb-4">
                                         <label class="fw-bold small text-uppercase text-muted mb-2">Full Name</label>
@@ -202,16 +202,28 @@
                                         </div>
                                     </div>
 
-                                    <div class="mb-5">
+                                    <div class="mb-4">
                                         <label class="fw-bold small text-uppercase text-muted mb-2">Create
                                             Password</label>
                                         <div class="input-group input-group-lg shadow-sm">
                                             <span class="input-group-text border-end-0"><i
                                                     class="fa-solid fa-lock"></i></span>
-                                            <input type="password" name="password"
+                                            <input type="password" name="password" id="passwordInput"
                                                 class="form-control border-start-0 ps-0" placeholder="••••••••"
                                                 required>
                                         </div>
+                                    </div>
+
+                                    <div class="mb-5">
+                                        <label class="fw-bold small text-uppercase text-muted mb-2">Confirm Password</label>
+                                        <div class="input-group input-group-lg shadow-sm">
+                                            <span class="input-group-text border-end-0"><i
+                                                    class="fa-solid fa-shield-heart"></i></span>
+                                            <input type="password" name="confirmPassword" id="confirmPasswordInput"
+                                                class="form-control border-start-0 ps-0" placeholder="Re-enter your password"
+                                                required>
+                                        </div>
+                                        <div id="passwordFeedback" class="small mt-2 d-none fw-bold"></div>
                                     </div>
 
                                     <button type="submit" id="submitBtn"
@@ -290,6 +302,24 @@
                 alert('Network error. Failed to send OTP.');
             }
         }
+
+        function validatePasswords() {
+            const password = document.getElementById('passwordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+            const feedback = document.getElementById('passwordFeedback');
+
+            if (password !== confirmPassword) {
+                feedback.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Passwords do not match';
+                feedback.className = 'small mt-2 fw-bold text-danger d-block';
+                return false;
+            }
+
+            feedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> Passwords match';
+            feedback.className = 'small mt-2 fw-bold text-success d-block';
+            return true;
+        }
+
+        document.getElementById('confirmPasswordInput').addEventListener('input', validatePasswords);
     </script>
 
 <%- include('../layouts/footer') %>

@@ -103,6 +103,17 @@
             color: white;
         }
 
+        .btn-warning-soft {
+            background-color: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .btn-warning-soft:hover {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #fff;
+        }
+
         .btn-ai {
             background-color: var(--ai-accent);
             border-color: var(--ai-accent);
@@ -150,6 +161,42 @@
         .text-muted {
             color: var(--shadow-muted) !important;
         }
+
+        .analytics-card {
+            background: linear-gradient(145deg, rgba(17, 24, 39, 0.98), rgba(30, 41, 59, 0.95));
+            border: 1px solid var(--shadow-border);
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            height: 100%;
+        }
+
+        .analytics-value {
+            font-size: clamp(1.7rem, 3vw, 2.4rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .order-table-scroll {
+            max-height: 860px;
+            overflow-y: auto;
+        }
+
+        .product-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .product-thumb-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--shadow-muted);
+        }
     </style>
 
     <div class="container-fluid py-3 mb-5">
@@ -159,6 +206,86 @@
             <div class="d-flex align-items-center">
                 <i class="fa-solid fa-server fa-2x me-3" style="color: var(--admin-accent);"></i>
                 <h2 class="mb-0 fw-bold text-white">Admin Dashboard</h2>
+            </div>
+        </div>
+
+        <div class="row g-3 g-lg-4 mb-2">
+            <div class="col-sm-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="small text-uppercase text-muted fw-bold mb-2">Total Orders</div>
+                    <div class="analytics-value"><%= analytics.totalOrders %></div>
+                    <div class="small text-info mt-2">All orders recorded</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="small text-uppercase text-muted fw-bold mb-2">Active Queue</div>
+                    <div class="analytics-value"><%= activeQueueCount %>/<%= queueLimit %></div>
+                    <div class="small <%= activeQueueCount < queueLimit ? 'text-success' : 'text-danger' %> mt-2">
+                        <%= activeQueueCount < queueLimit ? 'Queue open for new orders' : 'Queue is currently full' %>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="small text-uppercase text-muted fw-bold mb-2">Paid Revenue</div>
+                    <div class="analytics-value">Rs.<%= analytics.totalRevenue %></div>
+                    <div class="small text-success mt-2"><%= analytics.paidOrders %> paid orders</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="analytics-card">
+                    <div class="small text-uppercase text-muted fw-bold mb-2">Order Outcomes</div>
+                    <div class="small text-success mb-1">Fulfilled: <strong><%= analytics.fulfilledOrders %></strong></div>
+                    <div class="small text-danger mb-1">Rejected: <strong><%= analytics.rejectedOrders %></strong></div>
+                    <div class="small text-secondary">Cancelled: <strong><%= analytics.cancelledOrders %></strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card admin-card">
+            <div class="card-header admin-header-bg d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-chart-line me-2 text-info"></i>Analytics Snapshot</h5>
+                <span class="small text-muted">Top selling items and queue health</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <label class="small text-muted text-uppercase fw-bold mb-3">Top Selling Items</label>
+                        <div class="list-group shadow-sm">
+                            <% if (analytics.topItems.length === 0) { %>
+                                <div class="list-group-item">No order data yet.</div>
+                            <% } %>
+                            <% analytics.topItems.forEach((item, index) => { %>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="fw-bold text-white"><%= index + 1 %>. <%= item.name %></div>
+                                        <div class="small text-muted"><%= item.orders %> order entries</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-success-custom"><%= item.quantity %> units</div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <label class="small text-muted text-uppercase fw-bold mb-3">Quick Health</label>
+                        <div class="analytics-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Queue Capacity</span>
+                                <span class="fw-bold text-white"><%= activeQueueCount %>/<%= queueLimit %></span>
+                            </div>
+                            <div class="progress mb-4" style="height: 10px; background-color: rgba(255,255,255,0.08);">
+                                <div class="progress-bar <%= activeQueueCount < queueLimit ? 'bg-success' : 'bg-danger' %>" style="width: <%= Math.min((activeQueueCount / queueLimit) * 100, 100) %> %"></div>
+                            </div>
+                            <div class="small text-muted mb-2">Paid conversion</div>
+                            <div class="fw-bold text-info mb-3"><%= analytics.totalOrders ? Math.round((analytics.paidOrders / analytics.totalOrders) * 100) : 0 %>%</div>
+                            <div class="small text-muted mb-2">Fulfillment success</div>
+                            <div class="fw-bold text-success"><%= analytics.totalOrders ? Math.round((analytics.fulfilledOrders / analytics.totalOrders) * 100) : 0 %>%</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -290,7 +417,7 @@
                                             <%= prediction.demand %> <span class="fs-4 text-muted">Plates</span>
                                         </div>
                                         <small class="text-info opacity-75 fw-bold"><i
-                                                class="fa-solid fa-shield-halved me-1"></i> Includes a 10% safety buffer
+                                                class="fa-solid fa-shield-halved me-1"></i> Includes a 5% safety buffer
                                             for stock security</small>
                                     </div>
                                     <% } %>
@@ -302,15 +429,18 @@
             <div class="col-lg-8">
                 <div class="card admin-card h-100">
                     <div class="card-header admin-header-bg d-flex justify-content-between align-items-center py-3">
-                        <h5 class="mb-0 fw-bold text-white"><i
-                                class="fa-solid fa-satellite-dish me-2 text-danger"></i>Live Orders</h5>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-white"><i
+                                    class="fa-solid fa-satellite-dish me-2 text-danger"></i>Live Orders</h5>
+                            <div class="small text-muted mt-1">Latest 15 stay visible first. Older orders remain below on scroll.</div>
+                        </div>
                         <form action="/admin/order/clear" method="POST" class="m-0">
                             <button class="btn btn-sm btn-outline-danger shadow-sm fw-bold">
                                 <i class="fa-solid fa-dumpster me-1"></i> Clear All
                             </button>
                         </form>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive order-table-scroll">
                         <table class="table table-hover table-custom m-0 align-middle">
                             <thead>
                                 <tr>
@@ -321,7 +451,7 @@
                                 </tr>
                             </thead>
                             <tbody id="live-orders-table">
-                                <% orders.forEach(o=> { %>
+                                <% orders.forEach((o) => { %>
                                     <tr>
                                         <td class="ps-4">
                                             <strong class="text-white">
@@ -350,10 +480,10 @@
                                         </td>
                                         <td class="text-center">
                                             <span
-                                                class="badge w-100 <%= o.status==='Fulfilled'?'bg-success text-white':'bg-warning text-dark'%> rounded-pill px-3 py-2 shadow-sm">
+                                                class="badge w-100 <%= o.status==='Fulfilled' ? 'bg-success text-white' : o.status==='Rejected' ? 'bg-danger text-white' : o.status==='Cancelled' ? 'bg-secondary text-white' : 'bg-warning text-dark' %> rounded-pill px-3 py-2 shadow-sm">
                                                 <%= o.status %>
                                             </span>
-                                            <% if (o.couponCode && o.status !== 'Fulfilled') { %>
+                                            <% if (o.couponCode && o.status === 'Pending') { %>
                                                 <div class="mt-2 badge border border-info text-info bg-dark w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;">
                                                     <i class="fa-solid fa-ticket me-2"></i> <%= o.couponCode %>
                                                 </div>
@@ -361,7 +491,7 @@
                                         </td>
                                         <td class="pe-4">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <% if(o.status !=='Fulfilled' ) { %>
+                                                <% if(o.status === 'Pending') { %>
                                                     <% if (o.paymentStatus !== 'Paid') { %>
                                                         <form action="/admin/order/coupon/<%= o._id %>" method="POST" class="m-0">
                                                             <button class="btn btn-sm btn-info shadow-sm rounded-2 text-dark fw-bold" title="Payment Received - Issue Coupon">
@@ -376,6 +506,12 @@
                                                                     class="fa-solid fa-check"></i> FULFILL</button>
                                                         </form>
                                                     <% } %>
+                                                    <form action="/admin/order/reject/<%= o._id %>" method="POST"
+                                                        class="m-0">
+                                                        <button class="btn btn-sm btn-warning-soft shadow-sm rounded-2 fw-bold"
+                                                            title="Reject Order"><i
+                                                                    class="fa-solid fa-ban"></i> REJECT</button>
+                                                    </form>
                                                 <% } %>
                                                 <form action="/admin/order/delete/<%= o._id %>" method="POST"
                                                     class="m-0">
@@ -407,6 +543,7 @@
                             <input type="text" name="name" placeholder="Item Name" class="form-control mb-2" required>
                             <input type="number" name="price" placeholder="Price (₹)" class="form-control mb-2"
                                 required>
+                            <input type="url" name="imageUrl" placeholder="Optional image URL" class="form-control mb-2">
                             <select name="isAvailable" class="form-select mb-3">
                                 <option value="true">Available</option>
                                 <option value="false">Unavailable</option>
@@ -419,16 +556,35 @@
                         <ul class="list-group shadow-sm">
                             <% products.forEach(p=> { %>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <% if (p.imageUrl) { %>
+                                            <img src="<%= p.imageUrl %>" alt="<%= p.name %>" class="product-thumb">
+                                        <% } else { %>
+                                            <div class="product-thumb product-thumb-fallback">
+                                                <i class="fa-solid fa-burger"></i>
+                                            </div>
+                                        <% } %>
+                                        <div>
                                         <strong class="text-white">
                                             <%= p.name %>
                                         </strong>
+                                        <span class="badge ms-2 <%= p.isAvailable ? 'bg-success-subtle text-success border border-success' : 'bg-secondary text-white border border-secondary' %>">
+                                            <%= p.isAvailable ? 'Available' : 'Unavailable' %>
+                                        </span>
                                         <span class="text-success-custom fw-bold ms-1">₹<%= p.price %></span>
                                     </div>
-                                    <form action="/admin/product/delete/<%= p._id %>" method="POST" class="m-0">
-                                        <button class="btn btn-sm btn-outline-danger border-0"><i
-                                                class="fa-solid fa-xmark fs-5"></i></button>
-                                    </form>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <form action="/admin/product/toggle-availability/<%= p._id %>" method="POST" class="m-0">
+                                            <button class="btn btn-sm <%= p.isAvailable ? 'btn-warning-soft' : 'btn-outline-success' %> fw-bold">
+                                                <%= p.isAvailable ? 'Make Unavailable' : 'Make Available' %>
+                                            </button>
+                                        </form>
+                                        <form action="/admin/product/delete/<%= p._id %>" method="POST" class="m-0">
+                                            <button class="btn btn-sm btn-outline-danger border-0"><i
+                                                    class="fa-solid fa-xmark fs-5"></i></button>
+                                        </form>
+                                    </div>
                                 </li>
                                 <% }) %>
                         </ul>
@@ -485,11 +641,17 @@
                     <div class="mt-2 fw-bold text-success-custom fs-5">₹${o.totalAmount}</div>`;
 
                     // 2. Build the status badge HTML
-                    const badgeClass = o.status === 'Fulfilled' ? 'bg-success text-white' : 'bg-warning text-dark';
+                    const badgeClass =
+                        o.status === 'Fulfilled'
+                            ? 'bg-success text-white'
+                            : o.status === 'Rejected'
+                                ? 'bg-danger text-white'
+                                : o.status === 'Cancelled'
+                                    ? 'bg-secondary text-white'
+                                    : 'bg-warning text-dark';
                     let statusBadge = `<span class="badge ${badgeClass} w-100 rounded-pill px-3 py-2 shadow-sm">${o.status}</span>`;
                     
-                    // FIXED: ONLY SHOW COUPON CODE IF IT EXISTS AND STATUS IS NOT FULFILLED
-                    if (o.couponCode && o.status !== 'Fulfilled') {
+                    if (o.couponCode && o.status === 'Pending') {
                         statusBadge += `
                         <div class="mt-2 badge border border-info text-info bg-dark w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;">
                             <i class="fa-solid fa-ticket me-2"></i> ${o.couponCode}
@@ -499,7 +661,7 @@
                     // 3. Build the action buttons HTML
                     let actionButtons = '<div class="d-flex justify-content-end gap-2">';
 
-                    if (o.status !== 'Fulfilled') {
+                    if (o.status === 'Pending') {
                         if (o.paymentStatus !== 'Paid') {
                             // Show ISSUE COUPON button if unpaid
                             actionButtons += `
@@ -517,6 +679,13 @@
                                     </button>
                                 </form>`;
                         }
+
+                        actionButtons += `
+                            <form action="/admin/order/reject/${o._id}" method="POST" class="m-0">
+                                <button class="btn btn-sm btn-warning-soft shadow-sm rounded-2 fw-bold" title="Reject Order">
+                                    <i class="fa-solid fa-ban"></i> REJECT
+                                </button>
+                            </form>`;
                     }
 
                     actionButtons += `
