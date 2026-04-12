@@ -3,6 +3,8 @@ import express from 'express';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import connectDB from './config/db.js';
 import MongoStore from 'connect-mongo';
 
@@ -11,6 +13,7 @@ import authRoutes from './routes/authRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { homedir } from 'os';
+import { cos } from '@tensorflow/tfjs';
 
 // Environment variables configuration
 dotenv.config();
@@ -62,6 +65,33 @@ app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
 app.use('/admin', adminRoutes);
 
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { message } = req.body;
+        const ragFilePath = process.env.RAG_FILE_PATH || './kb.txt';
+        let context = "";
+        try {
+            context = fs.readFileSync(ragFilePath, 'utf8');
+        } catch(e) {
+            console.error("Could not read RAG file", e);
+            context = "Context file missing.";
+        }
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        
+        const prompt = `You are the Canteen DAMS AI Assistant. You must use the provided context to answer. Be warm, professional and format using basic markdown.\n\nContext:\n${context}\n\nUser Question: ${message}`;
+        
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+        
+        res.json({ reply: responseText });
+    } catch (error) {
+        console.error("Chat API Error:", error);
+        res.status(500).json({ reply: "Sorry, my AI engine encountered an error. Admin needs to verify the Gemini API Key." });
+    }
+});
+
 
 app.get('/', (req, res) => {
     // If they are already logged in, skip the landing page and take them to their dashboard
@@ -82,3 +112,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+

@@ -1,7 +1,7 @@
 import Student from "../models/Student.js";
 import Admin from "../models/Admin.js";
 import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
+import { buildAppUrl, sendMail } from "../utils/mailer.js";
 
 // ==========================================
 // RENDERS
@@ -46,14 +46,6 @@ export const sendOtp = async (req, res) => {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
     // Check if student already exists
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
@@ -69,8 +61,7 @@ export const sendOtp = async (req, res) => {
     req.session.otpExpires = Date.now() + 5 * 60 * 1000;
 
     // Send the formal email
-    await transporter.sendMail({
-      from: `"Canteen DAMS Support" <${process.env.EMAIL_USER}>`,
+    await sendMail({
       to: email,
       subject: "Action Required: Canteen Portal Account Verification",
       html: `
@@ -107,12 +98,16 @@ export const sendOtp = async (req, res) => {
 // 2. Student Signup (Verifies OTP & Sends Welcome Email)
 export const studentSignup = async (req, res) => {
   try {
-    const { name, email, password, year, branch, regNo, otp } = req.body;
+    const { name, email, password, confirmPassword, year, branch, regNo, otp } = req.body;
 
     // Backend Regex Check
     const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|famt\.ac\.in)$/;
     if (!emailRegex.test(email)) {
       return res.render("student/signup", { error: "Invalid email domain." });
+    }
+
+    if (password !== confirmPassword) {
+      return res.render("student/signup", { error: "Passwords do not match." });
     }
 
     // Verify OTP
@@ -142,16 +137,7 @@ export const studentSignup = async (req, res) => {
     // NEW: SEND WELCOME / THANK YOU EMAIL
     // ==========================================
     try {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: `"Canteen DAMS Support" <${process.env.EMAIL_USER}>`,
+      await sendMail({
         to: email,
         subject: "Welcome to Canteen DAMS - Registration Successful",
         html: `
@@ -184,7 +170,7 @@ export const studentSignup = async (req, res) => {
                   </p>
                   
                   <div style="text-align: center; margin-top: 30px; margin-bottom: 10px;">
-                      <a href="http://localhost:3000/auth/login/student" style="background-color: #7c3aed; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; display: inline-block;">Log In to Your Account</a>
+                      <a href="${buildAppUrl("/auth/login/student")}" style="background-color: #7c3aed; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; display: inline-block;">Log In to Your Account</a>
                   </div>
               </div>
               
@@ -289,10 +275,6 @@ export const logout = (req, res) => {
 // PASSWORD RESET LOGIC
 // ==========================================
 
-// ==========================================
-// PASSWORD RESET LOGIC
-// ==========================================
-
 export const sendForgotPasswordOtp = async (req, res) => {
   const { email } = req.body;
 
@@ -302,19 +284,13 @@ export const sendForgotPasswordOtp = async (req, res) => {
       return res.status(404).json({ success: false, message: "Email not found in our system." });
     }
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    });
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     req.session.resetOtp = otp;
     req.session.resetEmail = email;
     req.session.resetExpires = Date.now() + 5 * 60 * 1000;
 
-    await transporter.sendMail({
-      from: `"Canteen DAMS Security" <${process.env.EMAIL_USER}>`,
+    await sendMail({
       to: email,
       subject: "Action Required: Password Reset Request",
       html: `
@@ -367,7 +343,11 @@ export const sendForgotPasswordOtp = async (req, res) => {
 };
 
 export const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const { email, otp, newPassword, confirmPassword } = req.body;
+
+  if (newPassword !== confirmPassword) {
+    return res.render("student/forgot-password", { error: "Passwords do not match." });
+  }
 
   if (
     !req.session.resetOtp ||
@@ -389,13 +369,7 @@ export const resetPassword = async (req, res) => {
     // NEW: SEND PASSWORD CHANGE CONFIRMATION
     // ==========================================
     try {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-      });
-
-      await transporter.sendMail({
-        from: `"Canteen DAMS Security" <${process.env.EMAIL_USER}>`,
+      await sendMail({
         to: email,
         subject: "Security Update: Password Successfully Changed",
         html: `
@@ -420,7 +394,7 @@ export const resetPassword = async (req, res) => {
                   </div>
                   
                   <div style="text-align: center; margin-top: 30px;">
-                      <a href="http://localhost:3000/auth/login/student" style="background-color: #7c3aed; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; display: inline-block;">Return to Login Portal</a>
+                      <a href="${buildAppUrl("/auth/login/student")}" style="background-color: #7c3aed; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; display: inline-block;">Return to Login Portal</a>
                   </div>
               </div>
           </div>
