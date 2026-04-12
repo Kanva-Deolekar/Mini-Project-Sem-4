@@ -1,65 +1,39 @@
 import { trainFNN } from '../ml/trainModel.js';
 import { predict } from '../ml/predictDemand.js';
-import Product from '../models/Product.js';
-import Order from '../models/Order.js';
-import Admin from '../models/Admin.js';
-import { activeModel, activeMae } from '../ml/modelStore.js'; // <-- Import the RAM store
+import { buildAdminDashboardData, buildAdminDashboardPayload } from './adminController.js';
 
-const QUEUE_LIMIT = Number(process.env.ORDER_QUEUE_LIMIT || 10);
-
-const buildAdminViewData = async () => {
-    const products = await Product.find({});
-    const orders = await Order.find({}).sort({ orderTime: -1 });
-    const activeQueueCount = await Order.countDocuments({ status: 'Pending' });
-    const paidOrders = orders.filter((order) => order.paymentStatus === 'Paid');
-
-    const itemStats = new Map();
-    orders.forEach((order) => {
-        order.items.forEach((item) => {
-            const current = itemStats.get(item.itemName) || { quantity: 0, orders: 0 };
-            current.quantity += item.quantity || 0;
-            current.orders += 1;
-            itemStats.set(item.itemName, current);
-        });
-    });
-
-    const topItems = Array.from(itemStats.entries())
-        .map(([name, stats]) => ({ name, ...stats }))
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 5);
-
-    const adminDoc = await Admin.findOne({});
-    const eventActive = adminDoc ? adminDoc.eventActive : false;
-
-    return {
-        products,
-        orders,
-        isModelTrained: activeModel !== null,
-        eventActive,
-        activeMae,
-        activeQueueCount,
-        queueLimit: QUEUE_LIMIT,
-        analytics: {
-            totalOrders: orders.length,
-            fulfilledOrders: orders.filter((order) => order.status === 'Fulfilled').length,
-            rejectedOrders: orders.filter((order) => order.status === 'Rejected').length,
-            cancelledOrders: orders.filter((order) => order.status === 'Cancelled').length,
-            paidOrders: paidOrders.length,
-            totalRevenue: paidOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0),
-            topItems
-        }
-    };
-};
+const wantsJson = (req) =>
+    req.xhr ||
+    req.get('x-requested-with') === 'XMLHttpRequest' ||
+    req.get('accept')?.includes('application/json');
 
 export const uploadDatasetAndTrain = async (req, res) => {
     try {
         if (!req.file) throw new Error("Please upload a file.");
         await trainFNN(req.file.path);
 
-        // Redirect back to dashboard (it will run getDashboard and see the model is now true)
+        if (wantsJson(req)) {
+            const dashboard = await buildAdminDashboardPayload();
+            return res.json({
+                success: true,
+                action: 'model-trained',
+                message: 'Model successfully trained.',
+                dashboard
+            });
+        }
+
         res.redirect('/admin/dashboard');
     } catch (error) {
         console.error(error);
+        if (wantsJson(req)) {
+            const dashboard = await buildAdminDashboardPayload({ error: error.message });
+            return res.status(500).json({
+                success: false,
+                error: error.message,
+                dashboard
+            });
+        }
+
         res.redirect('/admin/dashboard');
     }
 };
@@ -68,15 +42,35 @@ export const runPrediction = async (req, res) => {
     const { day, time, itemName, price, avgSales, event } = req.body;
     try {
         const demand = await predict(day, time, itemName, price, event, avgSales);
-        const viewData = await buildAdminViewData();
+        const prediction = { item: itemName, demand };
+        const viewData = await buildAdminDashboardData();
+
+        if (wantsJson(req)) {
+            const dashboard = await buildAdminDashboardPayload({ prediction, error: null });
+            return res.json({
+                success: true,
+                action: 'prediction-generated',
+                prediction,
+                dashboard
+            });
+        }
 
         res.render('admin/dashboard', {
             ...viewData,
-            prediction: { item: itemName, demand },
+            prediction,
             error: null
         });
     } catch (error) {
-        const viewData = await buildAdminViewData();
+        const viewData = await buildAdminDashboardData();
+
+        if (wantsJson(req)) {
+            const dashboard = await buildAdminDashboardPayload({ prediction: null, error: error.message });
+            return res.status(500).json({
+                success: false,
+                error: error.message,
+                dashboard
+            });
+        }
 
         res.render('admin/dashboard', {
             ...viewData,

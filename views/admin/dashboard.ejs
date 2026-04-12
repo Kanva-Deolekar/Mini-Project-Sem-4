@@ -1,543 +1,594 @@
 <%- include('../layouts/header') %>
 
     <style>
+        /* Modern Dark Theme Palette */
         :root {
+            --shadow-accent: #7c3aed;
+            --shadow-accent-hover: #6d28d9;
             --shadow-bg: #0b0f19;
             --shadow-card: #111827;
             --shadow-text: #f8fafc;
-            --shadow-muted: #cbd5e1;
-            --shadow-border: rgba(255, 255, 255, 0.15);
-            --admin-accent: #dc2626;
-            --admin-accent-hover: #b91c1c;
+            --shadow-muted: #94a3b8;
+            --shadow-border: rgba(255, 255, 255, 0.08);
+            --admin-accent: #ef4444;
+            --admin-accent-hover: #dc2626;
             --ai-accent: #3b82f6;
+            --success-glow: rgba(16, 185, 129, 0.15);
+            --danger-glow: rgba(239, 68, 68, 0.15);
+            --info-glow: rgba(59, 130, 246, 0.15);
+            --purple-glow: rgba(124, 58, 237, 0.15);
         }
 
         body {
             background-color: var(--shadow-bg);
-            color: var(--shadow-text);
+            color: var(--shadow-text) !important;
+            --bs-body-bg: var(--shadow-bg);
+            --bs-body-color: var(--shadow-text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        /* Admin Cards */
+        /* --- Global Card Styling --- */
         .admin-card {
             background-color: var(--shadow-card);
-            border-radius: 1rem;
+            color: var(--shadow-text);
+            border-radius: 1.25rem;
             border: 1px solid var(--shadow-border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             overflow: hidden;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.3s ease;
+        }
+        .admin-card .card-header,
+        .admin-card .card-body,
+        .analytics-card,
+        .menu-item-card,
+        .table-custom tbody tr {
+            color: var(--shadow-text);
+        }
+        .admin-card:hover {
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
         }
 
         .admin-header-bg {
-            background: linear-gradient(135deg, #1f2937, #111827);
+            background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid var(--shadow-border);
+            padding: 1.25rem 1.5rem;
         }
 
         .ai-header-bg {
-            background: linear-gradient(135deg, #1e3a8a, #111827);
-            border-bottom: 1px solid var(--ai-accent);
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.3), transparent);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 1.25rem 1.5rem;
         }
 
-        /* Forms & Inputs */
-        .form-control,
-        .form-select,
-        .input-group-text {
+        /* --- Analytics Cards (Top Row) --- */
+        .analytics-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.6));
+            border: 1px solid var(--shadow-border);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            height: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+        }
+        /* Top border accents for analytics cards */
+        .ac-purple { border-top: 3px solid var(--shadow-accent); box-shadow: 0 8px 30px var(--purple-glow); }
+        .ac-info { border-top: 3px solid var(--ai-accent); box-shadow: 0 8px 30px var(--info-glow); }
+        .ac-success { border-top: 3px solid #10b981; box-shadow: 0 8px 30px var(--success-glow); }
+        .ac-danger { border-top: 3px solid var(--admin-accent); box-shadow: 0 8px 30px var(--danger-glow); }
+
+        .analytics-value {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        /* --- Forms & Inputs --- */
+        .form-control, .form-select, .input-group-text {
+            background-color: rgba(0, 0, 0, 0.25) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            border-radius: 0.5rem;
+            padding: 0.6rem 1rem;
+        }
+        .form-control:focus, .form-select:focus {
             background-color: rgba(0, 0, 0, 0.4) !important;
-            border: 1px solid var(--shadow-border) !important;
-            color: #ffffff !important;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            background-color: rgba(0, 0, 0, 0.6) !important;
-            box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25) !important;
+            box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.15) !important;
             border-color: var(--admin-accent) !important;
-            color: #ffffff !important;
         }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6) !important;
-            opacity: 1;
-        }
-
-        .form-select option {
-            background-color: #1f2937 !important;
-            color: #ffffff !important;
-        }
-
         .ai-input:focus {
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15) !important;
             border-color: var(--ai-accent) !important;
         }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
+        .form-select option { background-color: #1e293b !important; color: #ffffff !important; }
 
-        /* Tables */
-        .table-custom {
-            color: #ffffff !important;
-            --bs-table-bg: transparent;
-            --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+        /* --- Tables --- */
+        .order-table-scroll {
+            max-height: 800px;
+            overflow-y: auto;
         }
+        .order-table-scroll::-webkit-scrollbar { width: 6px; }
+        .order-table-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        .order-table-scroll::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.15); border-radius: 10px; }
 
+        .table-custom {
+            color: var(--shadow-text) !important;
+            margin-bottom: 0;
+            --bs-table-bg: transparent;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.02);
+        }
         .table-custom thead th {
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
             color: var(--shadow-muted) !important;
             border-bottom: 1px solid var(--shadow-border);
             text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 1rem 1.5rem;
         }
-
         .table-custom td {
             vertical-align: middle;
-            border-bottom: 1px solid var(--shadow-border);
-            color: #ffffff !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 1.25rem 1.5rem;
         }
 
-        /* Buttons */
-        .btn-admin {
-            background-color: var(--admin-accent);
-            border-color: var(--admin-accent);
-            color: white;
+        /* --- Menu Items Cards (Replaces List Group) --- */
+        .menu-list-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
+        .menu-list-container::-webkit-scrollbar { width: 4px; }
+        .menu-list-container::-webkit-scrollbar-track { background: transparent; }
+        .menu-list-container::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; }
 
-        .btn-admin:hover {
-            background-color: var(--admin-accent-hover);
-            color: white;
-        }
-
-        .btn-warning-soft {
-            background-color: rgba(245, 158, 11, 0.12);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.35);
-        }
-
-        .btn-warning-soft:hover {
-            background-color: rgba(245, 158, 11, 0.2);
-            color: #fff;
-        }
-
-        .btn-ai {
-            background-color: var(--ai-accent);
-            border-color: var(--ai-accent);
-            color: white;
-        }
-
-        .btn-ai:hover {
-            background-color: #2563eb;
-            color: white;
-        }
-
-        /* Custom AI Download Button */
-        .btn-ai-download {
-            background-color: rgba(56, 189, 248, 0.1);
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-ai-download:hover {
-            background-color: rgba(56, 189, 248, 0.2);
-            color: #fff;
-            border-color: #38bdf8;
-        }
-
-        /* List Groups */
-        .list-group-item {
-            background-color: transparent;
-            color: #ffffff !important;
-            border: 1px solid var(--shadow-border);
-        }
-
-        /* Badges */
-        .badge-status {
-            padding: 0.5em 0.8em;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-
-        .text-success-custom {
-            color: #34d399 !important;
-        }
-
-        .text-muted {
-            color: var(--shadow-muted) !important;
-        }
-
-        .analytics-card {
-            background: linear-gradient(145deg, rgba(17, 24, 39, 0.98), rgba(30, 41, 59, 0.95));
+        .menu-item-card {
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--shadow-border);
             border-radius: 1rem;
-            padding: 1rem 1.25rem;
-            height: 100%;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-item-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
-        .analytics-value {
-            font-size: clamp(1.7rem, 3vw, 2.4rem);
-            font-weight: 800;
-            color: #fff;
-            line-height: 1;
+        /* --- Badges & Images --- */
+        .badge-status {
+            padding: 0.6em 1em;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
         }
-
-        .order-table-scroll {
-            max-height: 860px;
-            overflow-y: auto;
-        }
-
         .product-thumb {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 0.75rem;
             object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
         }
-
         .product-thumb-fallback {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             color: var(--shadow-muted);
+            font-size: 1.25rem;
+        }
+
+        /* --- Buttons --- */
+        .btn { transition: all 0.2s ease; font-weight: 600; letter-spacing: 0.5px; }
+        .btn:hover { transform: translateY(-1px); }
+        
+        .btn-admin { background-color: var(--admin-accent); border-color: var(--admin-accent); color: white; }
+        .btn-admin:hover { background-color: var(--admin-accent-hover); color: white; }
+        
+        .btn-ai { background-color: var(--ai-accent); border-color: var(--ai-accent); color: white; }
+        .btn-ai:hover { background-color: #2563eb; color: white; box-shadow: 0 4px 12px var(--info-glow); }
+
+        .btn-warning-soft { background-color: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .btn-warning-soft:hover { background-color: rgba(245, 158, 11, 0.2); color: #fff; }
+
+        .btn-ai-download { background-color: rgba(56, 189, 248, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .btn-ai-download:hover { background-color: rgba(56, 189, 248, 0.2); color: #fff; border-color: #38bdf8; }
+
+        /* Typography */
+        .text-success-custom { color: #34d399 !important; }
+        .text-muted { color: var(--shadow-muted) !important; }
+        
+        /* Mobile fixes */
+        @media (max-width: 768px) {
+            .action-buttons-wrap { flex-wrap: wrap; justify-content: flex-start !important; }
+            .action-buttons-wrap form { flex-grow: 1; }
+            .action-buttons-wrap button { width: 100%; }
         }
     </style>
 
-    <div class="container-fluid py-3 mb-5">
+    <div class="container-fluid py-4 mb-5">
 
-        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom"
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom gap-3"
             style="border-color: var(--shadow-border) !important;">
             <div class="d-flex align-items-center">
-                <i class="fa-solid fa-server fa-2x me-3" style="color: var(--admin-accent);"></i>
-                <h2 class="mb-0 fw-bold text-white">Admin Dashboard</h2>
+                <div class="p-2 bg-danger bg-opacity-10 rounded-3 me-3 border border-danger border-opacity-25">
+                    <i class="fa-solid fa-server fa-2x text-danger"></i>
+                </div>
+                <h2 class="mb-0 fw-bold text-white tracking-tight">Admin Dashboard</h2>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <% if(eventActive) { %>
-                    <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 fw-bold" style="letter-spacing: 1px;"><i class="fa-solid fa-bolt me-1"></i> EVENT ACTIVE</span>
-                <% } else { %>
-                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary px-3 py-2 fw-bold" style="letter-spacing: 1px;">EVENT OFFLINE</span>
-                <% } %>
+            
+            <div class="d-flex align-items-center bg-dark bg-opacity-50 p-2 rounded-4 border" style="border-color: rgba(255,255,255,0.05);">
+                <div id="event-status-badge">
+                    <% if(eventActive) { %>
+                        <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 fw-bold rounded-pill me-3" style="letter-spacing: 1px;">
+                            <i class="fa-solid fa-bolt me-1"></i> EVENT ACTIVE
+                        </span>
+                    <% } else { %>
+                        <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary px-3 py-2 fw-bold rounded-pill me-3" style="letter-spacing: 1px;">
+                            <i class="fa-solid fa-moon me-1"></i> EVENT OFFLINE
+                        </span>
+                    <% } %>
+                </div>
                 <form action="/admin/toggle-event" method="POST" class="m-0">
-                    <button type="submit" class="btn btn-sm btn-outline-light shadow-sm fw-bold">Toggle Event Mode</button>
+                    <button type="submit" class="btn btn-sm btn-outline-light rounded-pill px-3 shadow-sm fw-bold">Toggle Mode</button>
                 </form>
             </div>
         </div>
 
-        <div class="row g-3 g-lg-4 mb-2">
+        <div id="analytics-summary" class="row g-3 g-lg-4 mb-4">
             <div class="col-sm-6 col-xl-3">
-                <div class="analytics-card">
-                    <div class="small text-uppercase text-muted fw-bold mb-2">Total Orders</div>
-                    <div class="analytics-value"><%= analytics.totalOrders %></div>
-                    <div class="small text-info mt-2">All orders recorded</div>
+                <div class="analytics-card ac-purple">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-uppercase text-muted fw-bold mb-2">Total Orders</div>
+                            <div class="analytics-value"><%= analytics.totalOrders %></div>
+                        </div>
+                        <div class="p-2 bg-purple rounded-3 bg-opacity-10 text-purple"><i class="fa-solid fa-receipt fs-4" style="color: var(--shadow-accent);"></i></div>
+                    </div>
+                    <div class="small text-muted mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">All orders recorded</div>
                 </div>
             </div>
+            
             <div class="col-sm-6 col-xl-3">
-                <div class="analytics-card">
-                    <div class="small text-uppercase text-muted fw-bold mb-2">Active Queue</div>
-                    <div class="analytics-value"><%= activeQueueCount %>/<%= queueLimit %></div>
-                    <div class="small <%= activeQueueCount < queueLimit ? 'text-success' : 'text-danger' %> mt-2">
-                        <%= activeQueueCount < queueLimit ? 'Queue open for new orders' : 'Queue is currently full' %>
+                <div class="analytics-card ac-info">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-uppercase text-muted fw-bold mb-2">Active Queue</div>
+                            <div class="analytics-value"><%= activeQueueCount %> <span class="fs-5 text-muted">/ <%= queueLimit %></span></div>
+                        </div>
+                        <div class="p-2 bg-info rounded-3 bg-opacity-10 text-info"><i class="fa-solid fa-users fs-4"></i></div>
+                    </div>
+                    <div class="small mt-3 pt-3 border-top <%= activeQueueCount < queueLimit ? 'text-info' : 'text-danger' %>" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <i class="fa-solid <%= activeQueueCount < queueLimit ? 'fa-door-open' : 'fa-lock' %> me-1"></i> <%= activeQueueCount < queueLimit ? 'Queue accepting orders' : 'Queue is currently full' %>
                     </div>
                 </div>
             </div>
+            
             <div class="col-sm-6 col-xl-3">
-                <div class="analytics-card">
-                    <div class="small text-uppercase text-muted fw-bold mb-2">Paid Revenue</div>
-                    <div class="analytics-value">Rs.<%= analytics.totalRevenue %></div>
-                    <div class="small text-success mt-2"><%= analytics.paidOrders %> paid orders</div>
+                <div class="analytics-card ac-success">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-uppercase text-muted fw-bold mb-2">Paid Revenue</div>
+                            <div class="analytics-value text-success-custom">₹<%= analytics.totalRevenue %></div>
+                        </div>
+                        <div class="p-2 bg-success rounded-3 bg-opacity-10 text-success"><i class="fa-solid fa-wallet fs-4"></i></div>
+                    </div>
+                    <div class="small text-muted mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">From <%= analytics.paidOrders %> paid orders</div>
                 </div>
             </div>
+            
             <div class="col-sm-6 col-xl-3">
-                <div class="analytics-card">
-                    <div class="small text-uppercase text-muted fw-bold mb-2">Order Outcomes</div>
-                    <div class="small text-success mb-1">Fulfilled: <strong><%= analytics.fulfilledOrders %></strong></div>
-                    <div class="small text-danger mb-1">Rejected: <strong><%= analytics.rejectedOrders %></strong></div>
-                    <div class="small text-secondary">Cancelled: <strong><%= analytics.cancelledOrders %></strong></div>
+                <div class="analytics-card ac-danger">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-uppercase text-muted fw-bold mb-2">Success Rate</div>
+                            <div class="analytics-value text-white">
+                                <%= analytics.totalOrders ? Math.round((analytics.fulfilledOrders / analytics.totalOrders) * 100) : 0 %>%
+                            </div>
+                        </div>
+                        <div class="p-2 bg-danger rounded-3 bg-opacity-10 text-danger"><i class="fa-solid fa-chart-pie fs-4"></i></div>
+                    </div>
+                    <div class="small mt-3 pt-3 border-top d-flex justify-content-between" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <span class="text-success"><i class="fa-solid fa-check me-1"></i><%= analytics.fulfilledOrders %> Done</span>
+                        <span class="text-danger"><i class="fa-solid fa-xmark me-1"></i><%= analytics.rejectedOrders %> Rej</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="card admin-card">
-            <div class="card-header admin-header-bg d-flex justify-content-between align-items-center py-3">
-                <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-chart-line me-2 text-info"></i>Analytics Snapshot</h5>
-                <span class="small text-muted">Top selling items and queue health</span>
+            <div class="card-header admin-header-bg d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-fire me-2 text-warning"></i>Analytics Snapshot</h5>
+                <span class="small text-muted d-none d-sm-inline">Top selling items and queue health</span>
             </div>
             <div class="card-body p-4">
-                <div class="row g-4">
+                <div class="row g-5">
                     <div class="col-lg-7">
-                        <label class="small text-muted text-uppercase fw-bold mb-3">Top Selling Items</label>
-                        <div class="list-group shadow-sm">
+                        <label class="small text-muted text-uppercase fw-bold mb-3"><i class="fa-solid fa-ranking-star me-2"></i>Top Selling Items</label>
+                        <div id="top-selling-items" class="d-flex flex-column gap-2">
                             <% if (analytics.topItems.length === 0) { %>
-                                <div class="list-group-item">No order data yet.</div>
+                                <div class="menu-item-card justify-content-center text-muted py-4">No order data yet.</div>
                             <% } %>
                             <% analytics.topItems.forEach((item, index) => { %>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="menu-item-card p-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="fw-bold text-white"><%= index + 1 %>. <%= item.name %></div>
-                                        <div class="small text-muted"><%= item.orders %> order entries</div>
+                                        <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width: 32px; height: 32px; color: var(--shadow-muted);"><%= index + 1 %></div>
+                                        <div>
+                                            <div class="fw-bold text-white fs-6"><%= item.name %></div>
+                                            <div class="small text-muted"><%= item.orders %> individual orders</div>
+                                        </div>
                                     </div>
                                     <div class="text-end">
-                                        <div class="fw-bold text-success-custom"><%= item.quantity %> units</div>
+                                        <div class="fw-bold text-success-custom bg-success bg-opacity-10 px-3 py-1 rounded-pill border border-success border-opacity-25"><%= item.quantity %> units</div>
                                     </div>
                                 </div>
                             <% }) %>
                         </div>
                     </div>
                     <div class="col-lg-5">
-                        <label class="small text-muted text-uppercase fw-bold mb-3">Quick Health</label>
-                        <div class="analytics-card">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-muted">Queue Capacity</span>
-                                <span class="fw-bold text-white"><%= activeQueueCount %>/<%= queueLimit %></span>
+                        <label class="small text-muted text-uppercase fw-bold mb-3"><i class="fa-solid fa-heart-pulse me-2"></i>Quick Health</label>
+                        <div id="quick-health-panel" class="analytics-card" style="border-top: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted fw-bold">Queue Capacity</span>
+                                <span class="fw-bold text-white fs-5"><%= activeQueueCount %> / <%= queueLimit %></span>
                             </div>
-                            <div class="progress mb-4" style="height: 10px; background-color: rgba(255,255,255,0.08);">
-                                <div class="progress-bar <%= activeQueueCount < queueLimit ? 'bg-success' : 'bg-danger' %>" style="width: <%= Math.min((activeQueueCount / queueLimit) * 100, 100) %>%"></div>
+                            <div class="progress mb-4 rounded-pill" style="height: 8px; background-color: rgba(255,255,255,0.08);">
+                                <div class="progress-bar rounded-pill <%= activeQueueCount < queueLimit ? 'bg-success' : 'bg-danger' %>" style="width: <%= Math.min((activeQueueCount / queueLimit) * 100, 100) %>%"></div>
                             </div>
-                            <div class="small text-muted mb-2">Paid conversion</div>
-                            <div class="fw-bold text-info mb-3"><%= analytics.totalOrders ? Math.round((analytics.paidOrders / analytics.totalOrders) * 100) : 0 %>%</div>
-                            <div class="small text-muted mb-2">Fulfillment success</div>
-                            <div class="fw-bold text-success"><%= analytics.totalOrders ? Math.round((analytics.fulfilledOrders / analytics.totalOrders) * 100) : 0 %>%</div>
+                            
+                            <hr style="border-color: rgba(255,255,255,0.1);">
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                                <span class="text-muted fw-bold">Paid Conversion</span>
+                                <span class="fw-bold text-info fs-5"><%= analytics.totalOrders ? Math.round((analytics.paidOrders / analytics.totalOrders) * 100) : 0 %>%</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="text-muted fw-bold">Fulfillment Success</span>
+                                <span class="fw-bold text-success-custom fs-5"><%= analytics.totalOrders ? Math.round((analytics.fulfilledOrders / analytics.totalOrders) * 100) : 0 %>%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card admin-card">
-            <div class="card-header ai-header-bg text-white d-flex justify-content-between align-items-center py-3">
-                <h5 class="mb-0 fw-bold d-flex align-items-center">
-                    <i class="fa-solid fa-brain me-2 text-info"></i> AI Demand Predictor (FNN)
+        <div class="card admin-card border-primary border-opacity-25">
+            <div class="card-header ai-header-bg text-white d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                <h5 class="mb-0 fw-bold d-flex align-items-center text-info">
+                    <i class="fa-solid fa-brain me-2"></i> AI Demand Predictor (FNN)
                 </h5>
 
-                <% if(isModelTrained) { %>
-                    <span class="badge bg-success bg-opacity-25 text-success-custom border border-success badge-status">
-                        <i class="fa-solid fa-circle-check me-1"></i> MODEL ONLINE
-                    </span>
-                    <% if(activeMae !== null && activeMae !== undefined) { %>
-                    <span class="badge bg-info bg-opacity-25 text-info border border-info badge-status ms-2">
-                        MAE: <%= parseFloat(activeMae).toFixed(3) %>
-                    </span>
-                    <% } %>
+                <div id="ai-status-badges" class="d-flex align-items-center flex-wrap gap-2">
+                    <% if(isModelTrained) { %>
+                        <span class="badge bg-success bg-opacity-25 text-success-custom border border-success badge-status">
+                            <i class="fa-solid fa-circle-check me-1"></i> MODEL ONLINE
+                        </span>
+                        <% if(activeMae !== null && activeMae !== undefined) { %>
+                        <span class="badge bg-info bg-opacity-25 text-info border border-info badge-status">
+                            MAE: <%= parseFloat(activeMae).toFixed(3) %>
+                        </span>
+                        <% } %>
                     <% } else { %>
                         <span class="badge bg-danger bg-opacity-25 text-danger border border-danger badge-status">
                             <i class="fa-solid fa-circle-xmark me-1"></i> OFFLINE (NEEDS DATA)
                         </span>
-                        <% } %>
+                    <% } %>
+                </div>
             </div>
 
-            <div class="card-body p-4">
-                <% if(error) { %>
-                    <div
-                        class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm border-0 bg-dark text-danger">
-                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                        <%= error %>
-                    </div>
+            <div class="card-body p-4 p-lg-5">
+                <div id="ai-feedback-area">
+                    <% if(error) { %>
+                        <div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm border-0 bg-dark text-danger mb-4">
+                            <i class="fa-solid fa-triangle-exclamation me-3 fs-5"></i>
+                            <div><%= error %></div>
+                        </div>
                     <% } %>
 
-                        <% if(isModelTrained && !prediction) { %>
-                            <div
-                                class="alert alert-success d-flex align-items-center rounded-3 shadow-sm border-0 bg-dark text-success-custom mb-4">
-                                <i class="fa-solid fa-microchip me-2"></i> AI Model successfully trained and loaded into
-                                server memory! Ready for predictions.
+                    <% if(isModelTrained && !prediction) { %>
+                        <div class="alert alert-success d-flex align-items-center rounded-3 shadow-sm border border-success border-opacity-25 bg-dark text-success-custom mb-5 p-3">
+                            <div class="bg-success bg-opacity-25 p-2 rounded-circle me-3"><i class="fa-solid fa-microchip fs-5"></i></div>
+                            <div>
+                                <strong class="d-block">Model Active</strong>
+                                <span>AI Model successfully trained and loaded into server memory. Ready for predictions.</span>
                             </div>
-                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
 
-                                <div class="row g-4">
-                                    <div class="col-lg-5 border-end border-secondary pe-lg-4 d-flex flex-column justify-content-center"
-                                        style="border-color: var(--shadow-border) !important;">
+                <div class="row g-5">
+                    <div class="col-lg-5 border-end border-secondary pe-lg-5" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="fw-bold text-uppercase text-white mb-0">
+                                <span class="text-muted me-2">1.</span> Train Model
+                            </h6>
+                            <a href="/admin/ml/download-data" class="btn btn-sm btn-ai-download shadow-sm fw-bold rounded-pill px-3">
+                                <i class="fa-solid fa-download me-1"></i> Get CSV
+                            </a>
+                        </div>
 
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <label class="fw-bold text-uppercase text-muted small mb-0">
-                                                <i class="fa-solid fa-database me-1"></i> 1. Training Data
-                                            </label>
+                        <form action="/admin/ml/train" method="POST" enctype="multipart/form-data" class="bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-50">
+                            <div class="mb-3">
+                                <label class="small text-muted fw-bold mb-2">Upload Training Dataset (.csv / .xlsx)</label>
+                                <input type="file" name="dataset" style="color: black;" class="form-control ai-input" accept=".csv, .xlsx" required>
+                            </div>
+                            <button class="btn btn-ai fw-bold w-100 rounded-3 py-2">
+                                <i class="fa-solid fa-gears me-2"></i> INITIATE TRAINING
+                            </button>
+                            <div class="small text-muted mt-3 text-center">
+                                <i class="fa-solid fa-circle-info me-1 text-info"></i> Download recent CSV, edit 'Events', and upload.
+                            </div>
+                        </form>
+                    </div>
 
-                                            <a href="/admin/ml/download-data"
-                                                class="btn btn-sm btn-ai-download shadow-sm fw-bold">
-                                                <i class="fa-solid fa-cloud-arrow-down me-1"></i> Get Last 30 Days
-                                            </a>
-                                        </div>
+                    <div class="col-lg-7 ps-lg-5">
+                        <h6 class="fw-bold text-uppercase text-white mb-4">
+                            <span class="text-muted me-2">2.</span> Run Prediction
+                        </h6>
 
-                                        <form action="/admin/ml/train" method="POST" enctype="multipart/form-data">
-                                            <div class="input-group mb-2 shadow-sm">
-                                                <input type="file" name="dataset" class="form-control ai-input"
-                                                    accept=".csv, .xlsx" required>
-                                                <button class="btn btn-ai fw-bold px-4">
-                                                    <i class="fa-solid fa-gears"></i> TRAIN
-                                                </button>
-                                            </div>
-                                            <small class="text-muted"><i class="fa-solid fa-circle-info me-1"></i>
-                                                Download recent CSV, edit 'Events' if needed, and upload.</small>
-                                        </form>
-                                    </div>
+                        <form action="/admin/ml/predict" method="POST" class="row g-3 bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-50">
+                            <div class="col-md-4">
+                                <label class="small text-muted fw-bold mb-1">Day</label>
+                                <select name="day" class="form-select ai-input border-0 shadow-sm">
+                                    <option>Mon</option><option>Tue</option><option>Wed</option><option>Thu</option><option>Fri</option><option>Sat</option><option>Sun</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted fw-bold mb-1">Time</label>
+                                <select name="time" class="form-select ai-input border-0 shadow-sm">
+                                    <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted fw-bold mb-1">Item Name</label>
+                                <input type="text" name="itemName" placeholder="e.g. Rice" class="form-control ai-input border-0 shadow-sm" required>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="small text-muted fw-bold mb-1">Price (₹)</label>
+                                <input type="number" name="price" placeholder="0" class="form-control ai-input border-0 shadow-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted fw-bold mb-1">Avg Daily Sales</label>
+                                <input type="number" name="avgSales" placeholder="0" class="form-control ai-input border-0 shadow-sm" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted fw-bold mb-1">Special Event?</label>
+                                <select name="event" class="form-select ai-input border-0 shadow-sm">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-12 mt-4">
+                                <button class="btn btn-ai w-100 fw-bold shadow-sm py-2 fs-6 rounded-3" <%=!isModelTrained ? 'disabled' : '' %>>
+                                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i> GENERATE PREDICTION
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-                                    <div class="col-lg-7 ps-lg-4">
-                                        <form action="/admin/ml/predict" method="POST" class="row g-3">
-                                            <label class="fw-bold text-uppercase text-muted small w-100 mb-0">
-                                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> 2. Run Demand
-                                                Prediction
-                                            </label>
-
-                                            <div class="col-md-3">
-                                                <select name="day" class="form-select ai-input">
-                                                    <option>Mon</option>
-                                                    <option>Tue</option>
-                                                    <option>Wed</option>
-                                                    <option>Thu</option>
-                                                    <option>Fri</option>
-                                                    <option>Sat</option>
-                                                    <option>Sun</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <select name="time" class="form-select ai-input">
-                                                    <option>Breakfast</option>
-                                                    <option>Lunch</option>
-                                                    <option>Dinner</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <input type="text" name="itemName" placeholder="Item (e.g. Rice)"
-                                                    class="form-control ai-input" required>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <input type="number" name="price" placeholder="Price (₹)"
-                                                    class="form-control ai-input" required>
-                                            </div>
-
-                                            <div class="col-md-4">
-                                                <input type="number" name="avgSales" placeholder="Avg Daily Sales"
-                                                    class="form-control ai-input" required>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <select name="event" class="form-select ai-input">
-                                                    <option value="No">Event: No</option>
-                                                    <option value="Yes">Event: Yes</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <button
-                                                    class="btn btn-ai w-100 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2"
-                                                    <%=!isModelTrained ? 'disabled' : '' %>>
-                                                    <i class="fa-solid fa-chart-pie"></i> PREDICT
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-
-                                <% if(prediction) { %>
-                                    <div class="mt-4 p-4 rounded-3 text-center"
-                                        style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
-                                        <h5 class="text-uppercase mb-2 text-info"><i
-                                                class="fa-solid fa-chart-column me-2"></i>Estimated Demand for <%=
-                                                prediction.item %>
-                                        </h5>
-                                        <div class="display-4 fw-bold text-white mb-2">
-                                            <%= prediction.demand %> <span class="fs-4 text-muted">Plates</span>
-                                        </div>
-                                        <small class="text-info opacity-75 fw-bold"><i
-                                                class="fa-solid fa-shield-halved me-1"></i> Includes a 5% safety buffer
-                                            for stock security</small>
-                                    </div>
-                                    <% } %>
+                <div id="prediction-result">
+                    <% if(prediction) { %>
+                        <div class="mt-5 p-5 rounded-4 text-center border position-relative overflow-hidden"
+                            style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.1)); border-color: rgba(59, 130, 246, 0.3) !important;">
+                            <i class="fa-solid fa-robot position-absolute opacity-10" style="font-size: 15rem; right: -2rem; bottom: -2rem;"></i>
+                            <h5 class="text-uppercase mb-3 text-info fw-bold letter-spacing-1">
+                                <i class="fa-solid fa-chart-column me-2"></i>Estimated Demand for <%= prediction.item %>
+                            </h5>
+                            <div class="display-1 fw-bold text-white mb-2" style="text-shadow: 0 0 30px rgba(59,130,246,0.5);">
+                                <%= prediction.demand %> <span class="fs-4 text-muted fw-normal">Plates</span>
+                            </div>
+                            <span class="badge bg-dark border border-secondary text-info px-3 py-2 rounded-pill shadow-sm">
+                                <i class="fa-solid fa-shield-halved me-1"></i> Includes a 5% safety buffer
+                            </span>
+                        </div>
+                    <% } %>
+                </div>
             </div>
         </div>
 
         <div class="row g-4">
-
             <div class="col-lg-8">
-                <div class="card admin-card h-100">
-                    <div class="card-header admin-header-bg d-flex justify-content-between align-items-center py-3">
+                <div class="card admin-card h-100 mb-0">
+                    <div class="card-header admin-header-bg d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                         <div>
-                            <h5 class="mb-0 fw-bold text-white"><i
-                                    class="fa-solid fa-satellite-dish me-2 text-danger"></i>Live Orders</h5>
-                            <div class="small text-muted mt-1">Latest 15 stay visible first. Older orders remain below on scroll.</div>
+                            <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-satellite-dish me-2 text-danger"></i>Live Orders</h5>
+                            <div class="small text-muted mt-1">Latest orders appear at top. Scroll for history.</div>
                         </div>
                         <form action="/admin/order/clear" method="POST" class="m-0">
-                            <button class="btn btn-sm btn-outline-danger shadow-sm fw-bold">
+                            <button class="btn btn-sm btn-outline-danger shadow-sm fw-bold rounded-pill px-3">
                                 <i class="fa-solid fa-dumpster me-1"></i> Clear All
                             </button>
                         </form>
                     </div>
-                    <div class="table-responsive order-table-scroll">
+                    
+                    <div class="table-responsive order-table-scroll p-0">
                         <table class="table table-hover table-custom m-0 align-middle">
-                            <thead>
+                            <thead class="position-sticky top-0 z-1 shadow-sm">
                                 <tr>
-                                    <th class="ps-4">Student</th>
-                                    <th>Order Details</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="pe-4 text-end">Actions</th>
+                                    <th class="ps-4 border-0">Student Info</th>
+                                    <th class="border-0">Order Details</th>
+                                    <th class="text-center border-0">Status</th>
+                                    <th class="pe-4 text-end border-0">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="live-orders-table">
-                                <% orders.forEach((o) => { %>
+                                <% orders.forEach(o=> { %>
                                     <tr>
                                         <td class="ps-4">
-                                            <strong class="text-white">
-                                                <%= o.studentName %>
-                                            </strong><br>
-                                            <small class="text-muted">
-                                                <%= o.year %> | <%= o.branch %>
-                                            </small><br>
-                                            <small class="text-muted">Reg: <%= o.regNo %></small>
+                                            <strong class="text-white fs-6"><%= o.studentName %></strong><br>
+                                            <span class="small text-muted"><%= o.year %> | <%= o.branch %></span><br>
+                                            <span class="badge bg-dark border border-secondary text-muted mt-1 px-2 py-1">Reg: <%= o.regNo %></span>
                                         </td>
                                         <td>
-                                            <div class="bg-dark bg-opacity-50 p-2 rounded-2 border border-secondary"
-                                                style="border-color: var(--shadow-border) !important;">
+                                            <div class="bg-dark bg-opacity-50 p-2 rounded-3 border border-secondary border-opacity-25 mb-2">
                                                 <ul class="mb-0 small ps-3 text-white">
                                                     <% o.items.forEach(i=> { %>
-                                                        <li><span class="text-danger fw-bold">
-                                                                <%= i.quantity %>x
-                                                            </span>
-                                                            <%= i.itemName %>
+                                                        <li class="mb-1">
+                                                            <span class="text-danger fw-bold me-1"><%= i.quantity %>x</span><%= i.itemName %>
                                                         </li>
-                                                        <% }) %>
+                                                    <% }) %>
                                                 </ul>
                                             </div>
-                                            <div class="mt-2 fw-bold text-success-custom fs-5">₹<%= o.totalAmount %>
-                                            </div>
+                                            <div class="fw-bold text-success-custom fs-5">₹<%= o.totalAmount %></div>
                                         </td>
-                                        <td class="text-center">
-                                            <span
-                                                class="badge w-100 <%= o.status==='Fulfilled' ? 'bg-success text-white' : o.status==='Rejected' ? 'bg-danger text-white' : o.status==='Cancelled' ? 'bg-secondary text-white' : 'bg-warning text-dark' %> rounded-pill px-3 py-2 shadow-sm">
+                                        <td class="text-center" style="width: 140px;">
+                                            <span class="badge w-100 <%= o.status==='Fulfilled'?'bg-success text-white': o.status==='Rejected'?'bg-danger text-white': o.status==='Cancelled'?'bg-secondary text-white':'bg-warning text-dark'%> rounded-pill px-3 py-2 shadow-sm">
                                                 <%= o.status %>
                                             </span>
-                                            <% if (o.couponCode && o.status === 'Pending') { %>
-                                                <div class="mt-2 badge border border-info text-info bg-dark w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;">
+                                            <% if (o.couponCode && o.status !== 'Fulfilled') { %>
+                                                <div class="mt-2 badge border border-info text-info bg-info bg-opacity-10 w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;">
                                                     <i class="fa-solid fa-ticket me-2"></i> <%= o.couponCode %>
                                                 </div>
                                             <% } %>
                                         </td>
                                         <td class="pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <% if(o.status === 'Pending') { %>
+                                            <div class="d-flex justify-content-end gap-2 action-buttons-wrap">
+                                                <% if(o.status !=='Fulfilled' && o.status !== 'Rejected' && o.status !== 'Cancelled') { %>
                                                     <% if (o.paymentStatus !== 'Paid') { %>
                                                         <form action="/admin/order/coupon/<%= o._id %>" method="POST" class="m-0">
-                                                            <button class="btn btn-sm btn-info shadow-sm rounded-2 text-dark fw-bold" title="Payment Received - Issue Coupon">
-                                                                <i class="fa-solid fa-ticket"></i> ISSUE COUPON
+                                                            <button class="btn btn-sm btn-info shadow-sm rounded-3 text-dark fw-bold h-100" title="Payment Received - Issue Coupon">
+                                                                <i class="fa-solid fa-ticket"></i> ISSUE
                                                             </button>
                                                         </form>
                                                     <% } else { %>
-                                                        <form action="/admin/order/fulfill/<%= o._id %>" method="POST"
-                                                            class="m-0">
-                                                            <button class="btn btn-sm btn-success shadow-sm rounded-2"
-                                                                title="Mark as Fulfilled"><i
-                                                                    class="fa-solid fa-check"></i> FULFILL</button>
+                                                        <form action="/admin/order/fulfill/<%= o._id %>" method="POST" class="m-0">
+                                                            <button class="btn btn-sm btn-success shadow-sm rounded-3 fw-bold h-100" title="Mark as Fulfilled">
+                                                                <i class="fa-solid fa-check"></i> FULFILL
+                                                            </button>
                                                         </form>
                                                     <% } %>
-                                                    <form action="/admin/order/reject/<%= o._id %>" method="POST"
-                                                        class="m-0">
-                                                        <button class="btn btn-sm btn-warning-soft shadow-sm rounded-2 fw-bold"
-                                                            title="Reject Order"><i
-                                                                    class="fa-solid fa-ban"></i> REJECT</button>
+                                                    <form action="/admin/order/reject/<%= o._id %>" method="POST" class="m-0">
+                                                        <button class="btn btn-sm btn-warning-soft shadow-sm rounded-3 fw-bold h-100" title="Reject Order">
+                                                            <i class="fa-solid fa-ban"></i>
+                                                        </button>
                                                     </form>
                                                 <% } %>
-                                                <form action="/admin/order/delete/<%= o._id %>" method="POST"
-                                                    class="m-0">
-                                                    <button class="btn btn-sm btn-danger shadow-sm rounded-2"
-                                                        title="Delete Order"><i
-                                                            class="fa-solid fa-trash-can"></i></button>
+                                                <form action="/admin/order/delete/<%= o._id %>" method="POST" class="m-0">
+                                                    <button class="btn btn-sm btn-outline-danger shadow-sm rounded-3 h-100" title="Delete Log">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>
                                     </tr>
-                                    <% }) %>
+                                <% }) %>
                             </tbody>
                         </table>
                     </div>
@@ -545,78 +596,113 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card admin-card h-100">
-                    <div class="card-header admin-header-bg py-3">
-                        <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-burger me-2 text-danger"></i>Menu
-                            Items</h5>
+                <div class="card admin-card h-100 mb-0">
+                    <div class="card-header admin-header-bg py-3 border-bottom-0">
+                        <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-burger me-2 text-warning"></i>Menu Manager</h5>
                     </div>
-                    <div class="card-body">
-                        <form action="/admin/product/add" method="POST"
-                            class="mb-4 bg-dark bg-opacity-25 p-3 rounded-3 border border-secondary"
-                            style="border-color: var(--shadow-border) !important;">
-                            <label class="small text-muted text-uppercase fw-bold mb-2">Add New Item</label>
-                            <input type="text" name="name" placeholder="Item Name" class="form-control mb-2" required>
-                            <input type="number" name="price" placeholder="Price (₹)" class="form-control mb-2"
-                                required>
-                            <input type="url" name="imageUrl" placeholder="Optional image URL" class="form-control mb-2">
-                            <select name="isAvailable" class="form-select mb-3">
-                                <option value="true">Available</option>
-                                <option value="false">Unavailable</option>
+                    <div class="card-body pt-0 d-flex flex-column">
+                        
+                        <form action="/admin/product/add" method="POST" class="mb-4 bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-25 shadow-sm">
+                            <label class="small text-muted text-uppercase fw-bold mb-3 d-block border-bottom border-secondary border-opacity-25 pb-2">Add New Item</label>
+                            
+                            <input type="text" name="name" placeholder="Item Name (e.g. Samosa)" class="form-control border-0 shadow-sm mb-3" required>
+                            
+                            <div class="input-group mb-3 shadow-sm">
+                                <span class="input-group-text border-0 bg-dark text-muted">₹</span>
+                                <input type="number" name="price" placeholder="Price" class="form-control border-0" required>
+                            </div>
+                            
+                            <input type="url" name="imageUrl" placeholder="Image URL (Optional)" class="form-control border-0 shadow-sm mb-3">
+                            
+                            <select name="category" class="form-select border-0 shadow-sm mb-3" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Breakfast">Breakfast</option>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Dinner">Dinner</option>
+                                <option value="Extra">Extra</option>
                             </select>
-                            <button class="btn btn-admin w-100 fw-bold shadow-sm"><i class="fa-solid fa-plus me-1"></i>
-                                ADD ITEM</button>
+
+                            <select name="isAvailable" class="form-select border-0 shadow-sm mb-4" required>
+                                <option value="true">🟢 Available (Visible)</option>
+                                <option value="false">🔴 Unavailable (Hidden)</option>
+                            </select>
+
+                            <button class="btn btn-admin w-100 fw-bold shadow-sm py-2 rounded-3">
+                                <i class="fa-solid fa-plus me-2"></i> ADD TO MENU
+                            </button>
                         </form>
 
-                        <label class="small text-muted text-uppercase fw-bold mb-2">Current Menu</label>
-                        <ul class="list-group shadow-sm">
+                        <label id="menu-items-heading" class="small text-muted text-uppercase fw-bold mb-3 ms-1">Current Menu Items (<%= products.length %>)</label>
+                        
+                        <div id="menu-items-container" class="menu-list-container flex-grow-1">
+                            <% if (products.length === 0) { %>
+                                <div class="text-center text-muted p-4 border border-secondary border-opacity-25 rounded-4 border-dashed">
+                                    <i class="fa-solid fa-plate-wheat fs-1 mb-2 opacity-50"></i>
+                                    <p class="mb-0">Menu is empty.</p>
+                                </div>
+                            <% } %>
                             <% products.forEach(p=> { %>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="menu-item-card shadow-sm">
                                     <div class="d-flex align-items-center gap-3">
                                         <% if (p.imageUrl) { %>
-                                            <img src="<%= p.imageUrl %>" alt="<%= p.name %>" class="product-thumb">
+                                            <img src="<%= p.imageUrl %>" alt="<%= p.name %>" class="product-thumb shadow-sm">
                                         <% } else { %>
-                                            <div class="product-thumb product-thumb-fallback">
-                                                <i class="fa-solid fa-burger"></i>
+                                            <div class="product-thumb product-thumb-fallback shadow-sm">
+                                                <i class="fa-solid fa-utensils"></i>
                                             </div>
                                         <% } %>
                                         <div>
-                                        <strong class="text-white">
-                                            <%= p.name %>
-                                        </strong>
-                                        <span class="badge ms-2 <%= p.isAvailable ? 'bg-success-subtle text-success border border-success' : 'bg-secondary text-white border border-secondary' %>">
-                                            <%= p.isAvailable ? 'Available' : 'Unavailable' %>
-                                        </span>
-                                        <span class="text-success-custom fw-bold ms-1">₹<%= p.price %></span>
+                                            <strong class="text-white d-block fs-6 mb-1"><%= p.name %></strong>
+                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                <span class="text-success-custom fw-bold">₹<%= p.price %></span>
+                                                <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.65rem;"><%= p.category || 'Other' %></span>
+                                                <span class="badge <%= p.isAvailable ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary' %>" style="font-size: 0.65rem;">
+                                                    <i class="fa-solid <%= p.isAvailable ? 'fa-eye' : 'fa-eye-slash' %> me-1"></i> <%= p.isAvailable ? 'Vis' : 'Hid' %>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
+                                    <div class="d-flex flex-column gap-2 ms-2">
                                         <form action="/admin/product/toggle-availability/<%= p._id %>" method="POST" class="m-0">
-                                            <button class="btn btn-sm <%= p.isAvailable ? 'btn-warning-soft' : 'btn-outline-success' %> fw-bold">
-                                                <%= p.isAvailable ? 'Make Unavailable' : 'Make Available' %>
+                                            <button class="btn btn-sm w-100 <%= p.isAvailable ? 'btn-outline-secondary text-muted' : 'btn-outline-success' %> rounded-2" title="Toggle Visibility">
+                                                <i class="fa-solid <%= p.isAvailable ? 'fa-eye-slash' : 'fa-eye' %>"></i>
                                             </button>
                                         </form>
                                         <form action="/admin/product/delete/<%= p._id %>" method="POST" class="m-0">
-                                            <button class="btn btn-sm btn-outline-danger border-0"><i
-                                                    class="fa-solid fa-xmark fs-5"></i></button>
+                                            <button class="btn btn-sm w-100 btn-outline-danger border-0 rounded-2 bg-danger bg-opacity-10" title="Delete Item">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
                                         </form>
                                     </div>
-                                </li>
-                                <% }) %>
-                        </ul>
+                                </div>
+                            <% }) %>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
-        preload="auto"></audio>
+    <audio id="notificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <script id="admin-dashboard-data" type="application/json"><%- JSON.stringify({
+        eventActive,
+        products,
+        orders,
+        prediction,
+        error,
+        isModelTrained,
+        activeMae,
+        queueLimit,
+        activeQueueCount,
+        analytics
+    }) %></script>
 
     <script>
-        let latestOrderId = null; // Tracks the most recent order
+        // --- Live Order Polling System ---
+        let latestOrderId = null; 
         let isFirstLoad = true;
 
-        // Ask the server for new orders every 3 seconds
         setInterval(fetchLiveOrders, 3000);
 
         async function fetchLiveOrders() {
@@ -627,35 +713,30 @@
                 const tbody = document.getElementById('live-orders-table');
                 if (!tbody) return;
 
-                // --- SOUND LOGIC ---
                 if (orders.length > 0) {
-                    const currentLatest = orders[0]._id; // The newest order is always at the top
+                    const currentLatest = orders[0]._id; 
 
-                    // If it's not the first load, and the top order ID is different than before, it's a new order!
                     if (!isFirstLoad && latestOrderId !== currentLatest) {
-                        document.getElementById('notificationSound').play().catch(e => console.log("Audio blocked until interaction."));
+                        document.getElementById('notificationSound').play().catch(e => console.log("Audio interaction blocked"));
                     }
                     latestOrderId = currentLatest;
                 }
                 isFirstLoad = false;
 
-                // --- HTML BUILDING LOGIC ---
                 let html = '';
 
                 orders.forEach(o => {
-                    // 1. Build the items list HTML
                     let itemsHtml = `
-                    <div class="bg-dark bg-opacity-50 p-2 rounded-2 border border-secondary" style="border-color: var(--shadow-border) !important;">
+                    <div class="bg-dark bg-opacity-50 p-2 rounded-3 border border-secondary border-opacity-25 mb-2">
                         <ul class="mb-0 small ps-3 text-white">`;
                     o.items.forEach(i => {
-                        itemsHtml += `<li><span class="text-danger fw-bold">${i.quantity}x</span> ${i.itemName}</li>`;
+                        itemsHtml += `<li><span class="text-danger fw-bold me-1">${i.quantity}x</span> ${i.itemName}</li>`;
                     });
                     itemsHtml += `
                         </ul>
                     </div>
-                    <div class="mt-2 fw-bold text-success-custom fs-5">₹${o.totalAmount}</div>`;
+                    <div class="fw-bold text-success-custom fs-5">₹${o.totalAmount}</div>`;
 
-                    // 2. Build the status badge HTML
                     const badgeClass =
                         o.status === 'Fulfilled'
                             ? 'bg-success text-white'
@@ -666,61 +747,56 @@
                                     : 'bg-warning text-dark';
                     let statusBadge = `<span class="badge ${badgeClass} w-100 rounded-pill px-3 py-2 shadow-sm">${o.status}</span>`;
                     
-                    if (o.couponCode && o.status === 'Pending') {
+                    if (o.couponCode && o.status !== 'Fulfilled') {
                         statusBadge += `
-                        <div class="mt-2 badge border border-info text-info bg-dark w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;">
+                        <div class="mt-2 badge border border-info text-info bg-info bg-opacity-10 w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;">
                             <i class="fa-solid fa-ticket me-2"></i> ${o.couponCode}
                         </div>`;
                     }
 
-                    // 3. Build the action buttons HTML
-                    let actionButtons = '<div class="d-flex justify-content-end gap-2">';
+                    let actionButtons = '<div class="d-flex justify-content-end gap-2 action-buttons-wrap">';
 
-                    if (o.status === 'Pending') {
+                    if (o.status !== 'Fulfilled' && o.status !== 'Rejected' && o.status !== 'Cancelled') {
                         if (o.paymentStatus !== 'Paid') {
-                            // Show ISSUE COUPON button if unpaid
                             actionButtons += `
-                                <form action="/admin/order/coupon/${o._id}" method="POST" class="m-0">
-                                    <button class="btn btn-sm btn-info shadow-sm rounded-2 text-dark fw-bold" title="Payment Received - Issue Coupon">
-                                        <i class="fa-solid fa-ticket"></i> ISSUE COUPON
+                                <form action="/admin/order/coupon/${o._id}" method="POST" class="m-0 flex-grow-1 flex-sm-grow-0">
+                                    <button class="btn btn-sm btn-info shadow-sm rounded-3 text-dark fw-bold w-100 h-100" title="Payment Received - Issue Coupon">
+                                        <i class="fa-solid fa-ticket"></i> ISSUE
                                     </button>
                                 </form>`;
                         } else {
-                            // Show FULFILL button only if it IS paid
                             actionButtons += `
-                                <form action="/admin/order/fulfill/${o._id}" method="POST" class="m-0">
-                                    <button class="btn btn-sm btn-success shadow-sm rounded-2" title="Mark as Fulfilled">
+                                <form action="/admin/order/fulfill/${o._id}" method="POST" class="m-0 flex-grow-1 flex-sm-grow-0">
+                                    <button class="btn btn-sm btn-success shadow-sm rounded-3 fw-bold w-100 h-100" title="Mark as Fulfilled">
                                         <i class="fa-solid fa-check"></i> FULFILL
                                     </button>
                                 </form>`;
                         }
-
                         actionButtons += `
                             <form action="/admin/order/reject/${o._id}" method="POST" class="m-0">
-                                <button class="btn btn-sm btn-warning-soft shadow-sm rounded-2 fw-bold" title="Reject Order">
-                                    <i class="fa-solid fa-ban"></i> REJECT
+                                <button class="btn btn-sm btn-warning-soft shadow-sm rounded-3 fw-bold h-100" title="Reject Order">
+                                    <i class="fa-solid fa-ban"></i>
                                 </button>
                             </form>`;
                     }
 
                     actionButtons += `
                         <form action="/admin/order/delete/${o._id}" method="POST" class="m-0">
-                            <button class="btn btn-sm btn-danger shadow-sm rounded-2" title="Delete Order">
+                            <button class="btn btn-sm btn-outline-danger shadow-sm rounded-3 h-100" title="Delete Log">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </form>
                     </div>`;
 
-                    // 4. Put it all together
                     html += `
                     <tr>
                         <td class="ps-4">
-                            <strong class="text-white">${o.studentName}</strong><br>
-                            <small class="text-muted">${o.year} | ${o.branch}</small><br>
-                            <small class="text-muted">Reg: ${o.regNo}</small>
+                            <strong class="text-white fs-6">${o.studentName}</strong><br>
+                            <span class="small text-muted">${o.year} | ${o.branch}</span><br>
+                            <span class="badge bg-dark border border-secondary text-muted mt-1 px-2 py-1">Reg: ${o.regNo}</span>
                         </td>
                         <td>${itemsHtml}</td>
-                        <td class="text-center">${statusBadge}</td>
+                        <td class="text-center" style="width: 140px;">${statusBadge}</td>
                         <td class="pe-4">${actionButtons}</td>
                     </tr>`;
                 });
@@ -731,6 +807,263 @@
                 console.error("Error fetching live orders:", error);
             }
         }
+    </script>
+
+    <script>
+        const dashboardDataEl = document.getElementById('admin-dashboard-data');
+        let dashboardState = dashboardDataEl ? JSON.parse(dashboardDataEl.textContent) : null;
+        const rupee = '\u20B9';
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getStatusBadgeClass(status) {
+            if (status === 'Fulfilled') return 'bg-success text-white';
+            if (status === 'Rejected') return 'bg-danger text-white';
+            if (status === 'Cancelled') return 'bg-secondary text-white';
+            return 'bg-warning text-dark';
+        }
+
+        function renderEventBadge(eventActive) {
+            const badge = document.getElementById('event-status-badge');
+            if (!badge) return;
+
+            badge.innerHTML = eventActive
+                ? `<span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 fw-bold rounded-pill me-3" style="letter-spacing: 1px;"><i class="fa-solid fa-bolt me-1"></i> EVENT ACTIVE</span>`
+                : `<span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary px-3 py-2 fw-bold rounded-pill me-3" style="letter-spacing: 1px;"><i class="fa-solid fa-moon me-1"></i> EVENT OFFLINE</span>`;
+        }
+
+        function renderAnalyticsSummary(data) {
+            const container = document.getElementById('analytics-summary');
+            if (!container) return;
+
+            const queueOk = data.activeQueueCount < data.queueLimit;
+            const successRate = data.analytics.totalOrders ? Math.round((data.analytics.fulfilledOrders / data.analytics.totalOrders) * 100) : 0;
+
+            container.innerHTML = `
+                <div class="col-sm-6 col-xl-3"><div class="analytics-card ac-purple"><div class="d-flex justify-content-between align-items-start"><div><div class="small text-uppercase text-muted fw-bold mb-2">Total Orders</div><div class="analytics-value">${data.analytics.totalOrders}</div></div><div class="p-2 bg-purple rounded-3 bg-opacity-10 text-purple"><i class="fa-solid fa-receipt fs-4" style="color: var(--shadow-accent);"></i></div></div><div class="small text-muted mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">All orders recorded</div></div></div>
+                <div class="col-sm-6 col-xl-3"><div class="analytics-card ac-info"><div class="d-flex justify-content-between align-items-start"><div><div class="small text-uppercase text-muted fw-bold mb-2">Active Queue</div><div class="analytics-value">${data.activeQueueCount} <span class="fs-5 text-muted">/ ${data.queueLimit}</span></div></div><div class="p-2 bg-info rounded-3 bg-opacity-10 text-info"><i class="fa-solid fa-users fs-4"></i></div></div><div class="small mt-3 pt-3 border-top ${queueOk ? 'text-info' : 'text-danger'}" style="border-color: rgba(255,255,255,0.05) !important;"><i class="fa-solid ${queueOk ? 'fa-door-open' : 'fa-lock'} me-1"></i> ${queueOk ? 'Queue accepting orders' : 'Queue is currently full'}</div></div></div>
+                <div class="col-sm-6 col-xl-3"><div class="analytics-card ac-success"><div class="d-flex justify-content-between align-items-start"><div><div class="small text-uppercase text-muted fw-bold mb-2">Paid Revenue</div><div class="analytics-value text-success-custom">${rupee}${data.analytics.totalRevenue}</div></div><div class="p-2 bg-success rounded-3 bg-opacity-10 text-success"><i class="fa-solid fa-wallet fs-4"></i></div></div><div class="small text-muted mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">From ${data.analytics.paidOrders} paid orders</div></div></div>
+                <div class="col-sm-6 col-xl-3"><div class="analytics-card ac-danger"><div class="d-flex justify-content-between align-items-start"><div><div class="small text-uppercase text-muted fw-bold mb-2">Success Rate</div><div class="analytics-value text-white">${successRate}%</div></div><div class="p-2 bg-danger rounded-3 bg-opacity-10 text-danger"><i class="fa-solid fa-chart-pie fs-4"></i></div></div><div class="small mt-3 pt-3 border-top d-flex justify-content-between" style="border-color: rgba(255,255,255,0.05) !important;"><span class="text-success"><i class="fa-solid fa-check me-1"></i>${data.analytics.fulfilledOrders} Done</span><span class="text-danger"><i class="fa-solid fa-xmark me-1"></i>${data.analytics.rejectedOrders} Rej</span></div></div></div>`;
+        }
+
+        function renderTopItems(data) {
+            const container = document.getElementById('top-selling-items');
+            if (!container) return;
+
+            if (!data.analytics.topItems.length) {
+                container.innerHTML = '<div class="menu-item-card justify-content-center text-muted py-4">No order data yet.</div>';
+                return;
+            }
+
+            container.innerHTML = data.analytics.topItems.map((item, index) => `
+                <div class="menu-item-card p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width: 32px; height: 32px; color: var(--shadow-muted);">${index + 1}</div>
+                        <div><div class="fw-bold text-white fs-6">${escapeHtml(item.name)}</div><div class="small text-muted">${item.orders} individual orders</div></div>
+                    </div>
+                    <div class="text-end"><div class="fw-bold text-success-custom bg-success bg-opacity-10 px-3 py-1 rounded-pill border border-success border-opacity-25">${item.quantity} units</div></div>
+                </div>`).join('');
+        }
+
+        function renderQuickHealth(data) {
+            const container = document.getElementById('quick-health-panel');
+            if (!container) return;
+
+            const queuePercent = data.queueLimit ? Math.min((data.activeQueueCount / data.queueLimit) * 100, 100) : 0;
+            const paidConversion = data.analytics.totalOrders ? Math.round((data.analytics.paidOrders / data.analytics.totalOrders) * 100) : 0;
+            const fulfillmentSuccess = data.analytics.totalOrders ? Math.round((data.analytics.fulfilledOrders / data.analytics.totalOrders) * 100) : 0;
+
+            container.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2"><span class="text-muted fw-bold">Queue Capacity</span><span class="fw-bold text-white fs-5">${data.activeQueueCount} / ${data.queueLimit}</span></div>
+                <div class="progress mb-4 rounded-pill" style="height: 8px; background-color: rgba(255,255,255,0.08);"><div class="progress-bar rounded-pill ${data.activeQueueCount < data.queueLimit ? 'bg-success' : 'bg-danger'}" style="width: ${queuePercent}%"></div></div>
+                <hr style="border-color: rgba(255,255,255,0.1);">
+                <div class="d-flex justify-content-between align-items-center mt-3 mb-2"><span class="text-muted fw-bold">Paid Conversion</span><span class="fw-bold text-info fs-5">${paidConversion}%</span></div>
+                <div class="d-flex justify-content-between align-items-center mt-3"><span class="text-muted fw-bold">Fulfillment Success</span><span class="fw-bold text-success-custom fs-5">${fulfillmentSuccess}%</span></div>`;
+        }
+
+        function renderAiStatus(data) {
+            const container = document.getElementById('ai-status-badges');
+            if (!container) return;
+
+            let html = data.isModelTrained
+                ? `<span class="badge bg-success bg-opacity-25 text-success-custom border border-success badge-status"><i class="fa-solid fa-circle-check me-1"></i> MODEL ONLINE</span>`
+                : `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger badge-status"><i class="fa-solid fa-circle-xmark me-1"></i> OFFLINE (NEEDS DATA)</span>`;
+
+            if (data.isModelTrained && data.activeMae !== null && data.activeMae !== undefined) {
+                html += `<span class="badge bg-info bg-opacity-25 text-info border border-info badge-status">MAE: ${Number(data.activeMae).toFixed(3)}</span>`;
+            }
+
+            container.innerHTML = html;
+            const predictButton = document.querySelector('form[action="/admin/ml/predict"] button');
+            if (predictButton) predictButton.disabled = !data.isModelTrained;
+        }
+
+        function renderAiFeedback(data) {
+            const feedback = document.getElementById('ai-feedback-area');
+            const prediction = document.getElementById('prediction-result');
+            if (!feedback || !prediction) return;
+
+            if (data.error) {
+                feedback.innerHTML = `<div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm border-0 bg-dark text-danger mb-4"><i class="fa-solid fa-triangle-exclamation me-3 fs-5"></i><div>${escapeHtml(data.error)}</div></div>`;
+            } else if (data.isModelTrained && !data.prediction) {
+                feedback.innerHTML = `<div class="alert alert-success d-flex align-items-center rounded-3 shadow-sm border border-success border-opacity-25 bg-dark text-success-custom mb-5 p-3"><div class="bg-success bg-opacity-25 p-2 rounded-circle me-3"><i class="fa-solid fa-microchip fs-5"></i></div><div><strong class="d-block">Model Active</strong><span>AI Model successfully trained and loaded into server memory. Ready for predictions.</span></div></div>`;
+            } else {
+                feedback.innerHTML = '';
+            }
+
+            prediction.innerHTML = data.prediction ? `<div class="mt-5 p-5 rounded-4 text-center border position-relative overflow-hidden" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(124, 58, 237, 0.1)); border-color: rgba(59, 130, 246, 0.3) !important;"><i class="fa-solid fa-robot position-absolute opacity-10" style="font-size: 15rem; right: -2rem; bottom: -2rem;"></i><h5 class="text-uppercase mb-3 text-info fw-bold letter-spacing-1"><i class="fa-solid fa-chart-column me-2"></i>Estimated Demand for ${escapeHtml(data.prediction.item)}</h5><div class="display-1 fw-bold text-white mb-2" style="text-shadow: 0 0 30px rgba(59,130,246,0.5);">${escapeHtml(data.prediction.demand)} <span class="fs-4 text-muted fw-normal">Plates</span></div><span class="badge bg-dark border border-secondary text-info px-3 py-2 rounded-pill shadow-sm"><i class="fa-solid fa-shield-halved me-1"></i> Includes a 5% safety buffer</span></div>` : '';
+        }
+
+        function renderMenuItems(data) {
+            const heading = document.getElementById('menu-items-heading');
+            const container = document.getElementById('menu-items-container');
+            if (!heading || !container) return;
+
+            heading.textContent = `Current Menu Items (${data.products.length})`;
+
+            if (!data.products.length) {
+                container.innerHTML = `<div class="text-center text-muted p-4 border border-secondary border-opacity-25 rounded-4 border-dashed"><i class="fa-solid fa-plate-wheat fs-1 mb-2 opacity-50"></i><p class="mb-0">Menu is empty.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = data.products.map((p) => `
+                <div class="menu-item-card shadow-sm">
+                    <div class="d-flex align-items-center gap-3">
+                        ${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" class="product-thumb shadow-sm">` : `<div class="product-thumb product-thumb-fallback shadow-sm"><i class="fa-solid fa-utensils"></i></div>`}
+                        <div>
+                            <strong class="text-white d-block fs-6 mb-1">${escapeHtml(p.name)}</strong>
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <span class="text-success-custom fw-bold">${rupee}${p.price}</span>
+                                <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.65rem;">${escapeHtml(p.category || 'Other')}</span>
+                                <span class="badge ${p.isAvailable ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary'}" style="font-size: 0.65rem;"><i class="fa-solid ${p.isAvailable ? 'fa-eye' : 'fa-eye-slash'} me-1"></i> ${p.isAvailable ? 'Vis' : 'Hid'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column gap-2 ms-2">
+                        <form action="/admin/product/toggle-availability/${p._id}" method="POST" class="m-0"><button class="btn btn-sm w-100 ${p.isAvailable ? 'btn-outline-secondary text-muted' : 'btn-outline-success'} rounded-2" title="Toggle Visibility"><i class="fa-solid ${p.isAvailable ? 'fa-eye-slash' : 'fa-eye'}"></i></button></form>
+                        <form action="/admin/product/delete/${p._id}" method="POST" class="m-0"><button class="btn btn-sm w-100 btn-outline-danger border-0 rounded-2 bg-danger bg-opacity-10" title="Delete Item"><i class="fa-solid fa-trash-can"></i></button></form>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderOrdersFromState(data) {
+            const tbody = document.getElementById('live-orders-table');
+            if (!tbody || !Array.isArray(data.orders)) return;
+
+            tbody.innerHTML = data.orders.map((o) => {
+                const itemsHtml = `<div class="bg-dark bg-opacity-50 p-2 rounded-3 border border-secondary border-opacity-25 mb-2"><ul class="mb-0 small ps-3 text-white">${o.items.map((i) => `<li><span class="text-danger fw-bold me-1">${i.quantity}x</span> ${escapeHtml(i.itemName)}</li>`).join('')}</ul></div><div class="fw-bold text-success-custom fs-5">${rupee}${o.totalAmount}</div>`;
+                let statusBadge = `<span class="badge ${getStatusBadgeClass(o.status)} w-100 rounded-pill px-3 py-2 shadow-sm">${escapeHtml(o.status)}</span>`;
+
+                if (o.couponCode && o.status !== 'Fulfilled') {
+                    statusBadge += `<div class="mt-2 badge border border-info text-info bg-info bg-opacity-10 w-100 py-2 d-flex align-items-center justify-content-center" style="font-size: 0.85rem; letter-spacing: 1px;"><i class="fa-solid fa-ticket me-2"></i> ${escapeHtml(o.couponCode)}</div>`;
+                }
+
+                let actionButtons = '<div class="d-flex justify-content-end gap-2 action-buttons-wrap">';
+                if (o.status !== 'Fulfilled' && o.status !== 'Rejected' && o.status !== 'Cancelled') {
+                    actionButtons += o.paymentStatus !== 'Paid'
+                        ? `<form action="/admin/order/coupon/${o._id}" method="POST" class="m-0 flex-grow-1 flex-sm-grow-0"><button class="btn btn-sm btn-info shadow-sm rounded-3 text-dark fw-bold w-100 h-100" title="Payment Received - Issue Coupon"><i class="fa-solid fa-ticket"></i> ISSUE</button></form>`
+                        : `<form action="/admin/order/fulfill/${o._id}" method="POST" class="m-0 flex-grow-1 flex-sm-grow-0"><button class="btn btn-sm btn-success shadow-sm rounded-3 fw-bold w-100 h-100" title="Mark as Fulfilled"><i class="fa-solid fa-check"></i> FULFILL</button></form>`;
+                    actionButtons += `<form action="/admin/order/reject/${o._id}" method="POST" class="m-0"><button class="btn btn-sm btn-warning-soft shadow-sm rounded-3 fw-bold h-100" title="Reject Order"><i class="fa-solid fa-ban"></i></button></form>`;
+                }
+
+                actionButtons += `<form action="/admin/order/delete/${o._id}" method="POST" class="m-0"><button class="btn btn-sm btn-outline-danger shadow-sm rounded-3 h-100" title="Delete Log"><i class="fa-solid fa-trash-can"></i></button></form></div>`;
+
+                return `<tr><td class="ps-4"><strong class="text-white fs-6">${escapeHtml(o.studentName)}</strong><br><span class="small text-muted">${escapeHtml(o.year)} | ${escapeHtml(o.branch)}</span><br><span class="badge bg-dark border border-secondary text-muted mt-1 px-2 py-1">Reg: ${escapeHtml(o.regNo)}</span></td><td>${itemsHtml}</td><td class="text-center" style="width: 140px;">${statusBadge}</td><td class="pe-4">${actionButtons}</td></tr>`;
+            }).join('');
+        }
+
+        function renderDashboardState(data, options = {}) {
+            dashboardState = data;
+            renderEventBadge(data.eventActive);
+            renderAnalyticsSummary(data);
+            renderTopItems(data);
+            renderQuickHealth(data);
+            renderMenuItems(data);
+            renderAiStatus(data);
+            renderOrdersFromState(data);
+            if (options.includeAiFeedback !== false) {
+                renderAiFeedback(data);
+            }
+        }
+
+        async function fetchDashboardState() {
+            const response = await fetch('/admin/api/dashboard', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch dashboard state');
+            }
+            return data;
+        }
+
+        async function submitAdminForm(form) {
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+
+            try {
+                const isMultipart = form.enctype === 'multipart/form-data';
+                const body = isMultipart ? new FormData(form) : new URLSearchParams(new FormData(form));
+
+                const response = await fetch(form.action, {
+                    method: form.method || 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Request failed');
+                }
+
+                const nextState = result.dashboard || result;
+                renderDashboardState(nextState, { includeAiFeedback: true });
+                latestOrderId = nextState.orders?.[0]?._id || latestOrderId;
+
+                if (form.action.includes('/admin/product/add') || form.action.includes('/admin/ml/train')) {
+                    form.reset();
+                }
+            } catch (error) {
+                console.error('Admin form submission failed:', error);
+                if (dashboardState) {
+                    renderAiFeedback({ ...dashboardState, error: error.message, prediction: dashboardState.prediction || null });
+                }
+            } finally {
+                if (submitButton) submitButton.disabled = false;
+            }
+        }
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (form.method.toUpperCase() !== 'POST') return;
+
+            event.preventDefault();
+            submitAdminForm(form);
+        });
+
+        renderDashboardState(dashboardState, { includeAiFeedback: true });
+        setInterval(async () => {
+            try {
+                const freshState = await fetchDashboardState();
+                renderDashboardState({ ...freshState, prediction: dashboardState?.prediction || null, error: dashboardState?.error || null }, { includeAiFeedback: false });
+            } catch (error) {
+                console.error('Dashboard sync failed:', error);
+            }
+        }, 5000);
     </script>
 
     <%- include('../layouts/footer') %>

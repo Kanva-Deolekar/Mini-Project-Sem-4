@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { downloadTrainingData } from '../controllers/adminController.js';
 import { isAdmin } from '../middleware/authMiddleware.js';
-import { toggleEventStatus, getDashboard, addProduct, deleteProduct, toggleProductAvailability, fulfillOrder, rejectOrder, deleteOrder, clearAllOrders, getLiveOrders ,issueCoupon} from '../controllers/adminController.js';
+import { toggleEventStatus, getDashboard, addProduct, deleteProduct, toggleProductAvailability, fulfillOrder, rejectOrder, deleteOrder, clearAllOrders, getLiveOrders, getDashboardData, issueCoupon} from '../controllers/adminController.js';
 import { uploadDatasetAndTrain, runPrediction } from '../controllers/mlController.js';
 
 const upload = multer({ dest: 'uploads/' });
@@ -29,6 +29,7 @@ router.post('/ml/train', upload.single('dataset'), uploadDatasetAndTrain);
 router.post('/ml/predict', runPrediction);
 // This creates the hidden API endpoint the frontend will talk to
 router.get('/api/orders', getLiveOrders);
+router.get('/api/dashboard', getDashboardData);
 router.get('/ml/download-data', downloadTrainingData);
 router.post('/order/coupon/:id', issueCoupon); 
 export default router;
