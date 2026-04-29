@@ -107,6 +107,54 @@
             box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15) !important;
             border-color: var(--ai-accent) !important;
         }
+        .file-input-dark {
+            color: #e2e8f0 !important;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.82)) !important;
+            border: 1px solid rgba(59, 130, 246, 0.22) !important;
+            padding: 0.4rem !important;
+        }
+        .file-input-dark::-webkit-file-upload-button {
+            margin-right: 0.9rem;
+            border: 0;
+            border-radius: 0.7rem;
+            padding: 0.72rem 1rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
+            color: white;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+        }
+        .file-input-dark::file-selector-button {
+            margin-right: 0.9rem;
+            border: 0;
+            border-radius: 0.7rem;
+            padding: 0.72rem 1rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
+            color: white;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .file-input-dark:hover::file-selector-button {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(59, 130, 246, 0.28);
+        }
+        .training-pulse {
+            position: relative;
+            overflow: hidden;
+        }
+        .training-pulse::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.18), transparent);
+            transform: translateX(-100%);
+            animation: trainingSweep 1.3s linear infinite;
+        }
+        @keyframes trainingSweep {
+            to { transform: translateX(100%); }
+        }
         .form-control::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
         .form-select option { background-color: #1e293b !important; color: #ffffff !important; }
 
@@ -421,12 +469,12 @@
                             </a>
                         </div>
 
-                        <form action="/admin/ml/train" method="POST" enctype="multipart/form-data" class="bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-50">
+                        <form id="train-model-form" action="/admin/ml/train" method="POST" enctype="multipart/form-data" class="bg-dark bg-opacity-50 p-4 rounded-4 border border-secondary border-opacity-50">
                             <div class="mb-3">
                                 <label class="small text-muted fw-bold mb-2">Upload Training Dataset (.csv / .xlsx)</label>
-                                <input type="file" name="dataset" style="color: black;" class="form-control ai-input" accept=".csv, .xlsx" required>
+                                <input type="file" name="dataset" class="form-control ai-input file-input-dark" accept=".csv, .xlsx" required>
                             </div>
-                            <button class="btn btn-ai fw-bold w-100 rounded-3 py-2">
+                            <button id="train-model-button" class="btn btn-ai fw-bold w-100 rounded-3 py-2">
                                 <i class="fa-solid fa-gears me-2"></i> INITIATE TRAINING
                             </button>
                             <div class="small text-muted mt-3 text-center">
@@ -1009,7 +1057,31 @@
 
         async function submitAdminForm(form) {
             const submitButton = form.querySelector('button[type="submit"]');
+            const isTrainingForm = form.action.includes('/admin/ml/train');
+            const originalButtonHtml = submitButton ? submitButton.innerHTML : '';
             if (submitButton) submitButton.disabled = true;
+
+            if (isTrainingForm && submitButton) {
+                submitButton.classList.add('training-pulse');
+                submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> TRAINING MODEL...';
+                renderAiFeedback({
+                    ...dashboardState,
+                    error: null,
+                    prediction: null,
+                    isModelTrained: false
+                });
+                const feedback = document.getElementById('ai-feedback-area');
+                if (feedback) {
+                    feedback.innerHTML = `
+                        <div class="alert alert-info d-flex align-items-center rounded-3 shadow-sm border border-info border-opacity-25 bg-dark text-info mb-5 p-3">
+                            <div class="bg-info bg-opacity-10 p-2 rounded-circle me-3"><i class="fa-solid fa-spinner fa-spin fs-5"></i></div>
+                            <div>
+                                <strong class="d-block">Training in Progress</strong>
+                                <span>The model is buffering training data and learning patterns. Please wait a moment.</span>
+                            </div>
+                        </div>`;
+                }
+            }
 
             try {
                 const isMultipart = form.enctype === 'multipart/form-data';
@@ -1042,7 +1114,11 @@
                     renderAiFeedback({ ...dashboardState, error: error.message, prediction: dashboardState.prediction || null });
                 }
             } finally {
-                if (submitButton) submitButton.disabled = false;
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('training-pulse');
+                    submitButton.innerHTML = originalButtonHtml;
+                }
             }
         }
 

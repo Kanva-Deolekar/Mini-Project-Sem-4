@@ -194,6 +194,156 @@
         font-weight: 700;
     }
 
+    .section-block {
+        padding: 4rem 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .section-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        color: #f8fafc;
+        margin-bottom: 1rem;
+    }
+
+    .section-copy {
+        color: var(--shadow-muted);
+        max-width: 760px;
+        margin: 0 auto;
+        line-height: 1.8;
+    }
+
+    .showcase-panel,
+    .feature-showcase-card {
+        background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.92));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .showcase-panel {
+        padding: 2rem;
+    }
+
+    .showcase-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .student-badge {
+        color: #c4b5fd;
+        background: rgba(124, 58, 237, 0.14);
+        border: 1px solid rgba(124, 58, 237, 0.25);
+    }
+
+    .admin-badge {
+        color: #fda4af;
+        background: rgba(220, 38, 38, 0.14);
+        border: 1px solid rgba(220, 38, 38, 0.25);
+    }
+
+    .showcase-image {
+        margin-top: 1.75rem;
+        border-radius: 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: linear-gradient(160deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 1));
+        padding: 1.25rem;
+    }
+
+    .mock-window {
+        border-radius: 1rem;
+        background: rgba(2, 6, 23, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+    }
+
+    .mock-topbar {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.8rem 1rem;
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mock-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .mock-content {
+        padding: 1.2rem;
+    }
+
+    .mock-stat-grid,
+    .feature-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+    }
+
+    .mock-box,
+    .feature-showcase-card {
+        padding: 1.1rem;
+    }
+
+    .mock-box {
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mini-list {
+        display: grid;
+        gap: 0.8rem;
+        margin-top: 1rem;
+    }
+
+    .mini-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 1rem;
+        border-radius: 0.9rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: #e2e8f0;
+    }
+
+    .feature-showcase-card {
+        transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .feature-showcase-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(124, 58, 237, 0.35);
+    }
+
+    .feature-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.35rem;
+        background: rgba(124, 58, 237, 0.14);
+        color: #c4b5fd;
+    }
+
     /* =========================================
        MOBILE & TABLET RESPONSIVENESS
        ========================================= */
@@ -275,7 +425,7 @@
                         </div>
                         <h3 class="fw-bold mb-3 text-white">Student Portal</h3>
                         <p class="text-white opacity-75 small mb-4" style="line-height: 1.6;">Skip the lines. Browse the live menu, place orders asynchronously, and track your food status in real-time.</p>
-                        <a href="/auth/login/student" class="btn btn-custom btn-student">
+                        <a href="<%= role === 'student' ? '/student/dashboard' : '/auth/login/student' %>" class="btn btn-custom btn-student">
                             Access Portal <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
@@ -288,7 +438,7 @@
                         </div>
                         <h3 class="fw-bold mb-3 text-white">Admin Dashboard</h3>
                         <p class="text-white opacity-75 small mb-4" style="line-height: 1.6;">Manage live inventory, fulfill incoming orders, and run demand forecasting using the built-in Machine Learning engine.</p>
-                        <a href="/auth/login/admin" class="btn btn-custom btn-admin">
+                        <a href="<%= role === 'admin' ? '/admin/dashboard' : '/auth/login/admin' %>" class="btn btn-custom btn-admin">
                             System Login <i class="fa-solid fa-terminal"></i>
                         </a>
                     </div>
@@ -297,6 +447,41 @@
             </div>
         </div>
     </div>
+
+
+
+    <section class="section-block pt-0">
+        <div class="container">
+            <div class="text-center mb-5">
+                <p class="text-info text-uppercase fw-bold small mb-2" style="letter-spacing: 0.18em;">Core Highlights</p>
+                <h2 class="section-title">Features That Make The System Useful Daily</h2>
+                
+            </div>
+
+            <div class="feature-card-grid">
+                <div class="feature-showcase-card">
+                    <div class="feature-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <h4 class="fw-bold text-white">Preorder Before You Reach</h4>
+                    <p class="text-white-50 mb-0">Students can choose items in advance, confirm quantities, and cut down waiting time during busy hours.</p>
+                </div>
+                <div class="feature-showcase-card">
+                    <div class="feature-icon"><i class="fa-solid fa-signal"></i></div>
+                    <h4 class="fw-bold text-white">Live Queue Awareness</h4>
+                    <p class="text-white-50 mb-0">Queue limits help the kitchen avoid overload while showing students whether ordering is currently available.</p>
+                </div>
+                <div class="feature-showcase-card">
+                    <div class="feature-icon"><i class="fa-solid fa-ticket"></i></div>
+                    <h4 class="fw-bold text-white">Digital Coupon Flow</h4>
+                    <p class="text-white-50 mb-0">Payment verification and coupon generation make collection simpler and reduce confusion at the counter.</p>
+                </div>
+                <div class="feature-showcase-card">
+                    <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <h4 class="fw-bold text-white">Analytics + Forecasting</h4>
+                    <p class="text-white-50 mb-0">Admins can review trends, identify popular items, and use the AI model to prepare smarter cooking quantities.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <div class="tech-ribbon w-100">
         <div class="container">

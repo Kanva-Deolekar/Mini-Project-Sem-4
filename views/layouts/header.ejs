@@ -157,6 +157,26 @@
                         <span>Install App</span>
                     </button>
 
+                    <a href="/"
+                        class="btn btn-sm header-btn px-3 py-2 fw-bold shadow-sm">
+                        <i class="fa-solid fa-house"></i>
+                        <span class="d-none d-sm-inline">Home</span>
+                    </a>
+
+                    <% if (role === 'student') { %>
+                        <a href="/student/dashboard"
+                            class="btn btn-sm header-btn px-3 py-2 fw-bold shadow-sm">
+                            <i class="fa-solid fa-table-columns"></i>
+                            <span class="d-none d-sm-inline">Dashboard</span>
+                        </a>
+                    <% } else if (role === 'admin') { %>
+                        <a href="/admin/dashboard"
+                            class="btn btn-sm header-btn px-3 py-2 fw-bold shadow-sm">
+                            <i class="fa-solid fa-table-columns"></i>
+                            <span class="d-none d-sm-inline">Dashboard</span>
+                        </a>
+                    <% } %>
+
                     <% if (user.email) { %>
                         <a href="/student/profile"
                             class="btn btn-sm header-btn btn-profile px-3 py-2 fw-bold shadow-sm">

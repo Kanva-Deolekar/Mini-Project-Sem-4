@@ -56,7 +56,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Inject session data to locals for EJS views
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
-    res.locals.role = req.session.role || null;
+    res.locals.role = req.session.role || req.session.user?.role || null;
     next();
 });
 
@@ -94,16 +94,6 @@ app.post('/api/chat', async (req, res) => {
 
 
 app.get('/', (req, res) => {
-    // If they are already logged in, skip the landing page and take them to their dashboard
-    if (req.session && req.session.user) {
-        if (req.session.user.role === "student") {
-            return res.redirect('/student/dashboard');
-        } else if (req.session.user.role === "admin") {
-            return res.redirect('/admin/dashboard');
-        }
-    }
-    
-    // If not logged in, show the beautiful new landing page
     res.render('home'); 
 });
 
